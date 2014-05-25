@@ -1,0 +1,62 @@
+Name:                   scrapegis
+Version:                0.0.0
+Author:                 Ryan Johnson <ryan.txanson@gmail.com>
+Maintainer:             Ryan Johnson <ryan.txanson@gmail.com>
+License:                BSD3
+License-File:           LICENSE
+-- Synopsis:               
+-- Description:            
+Cabal-Version:          >= 1.16
+Build-Type:             Simple
+
+Library
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       src
+  GHC-Options:          -Wall
+  Exposed-modules:
+    Scrapegis
+    Scrapegis.Types
+    Scrapegis.Hennepin
+  Build-Depends:        
+      base >= 4 && < 5
+    , wreq
+    , aeson
+    , cassava
+    , bytestring
+    , containers
+    , text
+    , lens
+
+Executable scrapegis
+  main-is:
+      src/Main.hs
+  Default-Language:
+      Haskell2010
+  ghc-options:
+      -Wall
+  hs-source-dirs
+      src
+  build-depends:
+      base >= 4 && < 5
+    , wreq
+    , aeson
+    , cassava
+    , bytestring
+    , containers
+    , text
+    , lens
+
+
+Test-Suite spec
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       src
+                      , test
+  Ghc-Options:          -Wall
+  Main-Is:              Spec.hs
+  Build-Depends:        base
+                      , hspec
+
+Source-Repository head
+  Type:                 git
+--  Location:             
