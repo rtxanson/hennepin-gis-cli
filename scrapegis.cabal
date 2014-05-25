@@ -20,6 +20,7 @@ Executable scrapegis
   build-depends:
       base >= 4 && < 5
     , wreq
+    , docopt
     , aeson
     , cassava
     , bytestring
@@ -27,6 +28,7 @@ Executable scrapegis
     , text
     , lens
 
+-- TODO: docopt isn't yet in cabal, how to include this in build depends?
 
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
