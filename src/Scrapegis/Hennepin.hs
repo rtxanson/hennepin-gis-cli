@@ -5,6 +5,7 @@ module Scrapegis.Hennepin
     ) where
 
 import Scrapegis.Types
+import Scrapegis.Utils
 
 import Network.Wreq
 
@@ -55,6 +56,37 @@ idReq querystring = getWith opts url
 --
 -- | TODO: finish up the chunking part. For now this is good enough for
 -- | testing.
+
+getChunk :: [[Integer]] -> IO [Maybe FeatureLookup]
+getChunk [] = return []
+getChunk (first:rest) = do
+    recs <- getRecordByIds first
+    let mrec = decodeRecResponseToJSON recs
+    when (L.length rest > 0) $ return $ mrec : getChunk rest
+
+-- interpretLines :: Map.Map String [Char] -> [[String]] -> IO ()
+-- interpretLines cache [] = putStrLn ""
+-- interpretLines cache chunks = do
+--     let chunk:rest = chunks
+--     (cache, sub_lines) <- lookupLines cache $ unlines chunk
+--     let prtlines = unlines [a | a <- lines sub_lines, length a > 0]
+--     putStrLn prtlines
+--     when (length rest > 0) $ interpretLines cache rest
+
+
+getHenCountyRecords' :: Text -> IO (Maybe FeatureLookup)
+getHenCountyRecords' query_string = do
+    r <- idReq query_string
+    let m = decodeIDResponseToJSON r
+    let ids = getIDs m
+    let id_chunks = chunkArray 5 ids
+    print id_chunks
+    mrec <- getChunk id_chunks
+    return mrec 
+  where
+    getIDs :: Maybe IDQueryResult -> [Integer]
+    getIDs (Just array) = getIDList array
+    getIDs Nothing = []
 
 getHenCountyRecords :: Text -> IO (Maybe FeatureLookup)
 getHenCountyRecords query_string = do

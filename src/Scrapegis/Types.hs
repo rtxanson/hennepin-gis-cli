@@ -9,29 +9,43 @@ module Scrapegis.Types
     , featureAttributes
     ) where
 
+import Data.Text as T
+
 import Data.Aeson
 import Data.Map as M
 import Control.Applicative
 import Data.Csv (toRecord, toField, ToRecord, record)
 
+cleanField x = T.strip <$> x
+
 -- TODO: all of the fields in this mapping are kind of crazy and need to be
 -- handled. For now just a subset to get the concept working.
 
 data FeatureAttributes = FeatureAttributes {
-      getZipCode :: String
-    , getMunicipalityName :: String
+      getZipCode :: T.Text
+    , getMunicipalityName :: T.Text
     , getObjectID :: Integer
-    , getObjectPID :: String
-    , getOwnerName :: String
+    , getObjectPID :: T.Text
+    , getOwnerName :: T.Text
+
+    , getStreetName :: T.Text
+    , getHouseNumber :: Integer
     } deriving (Show)
 
 instance FromJSON FeatureAttributes where
   parseJSON (Object o) = 
     FeatureAttributes <$> (o .: "ZIP_CD")
-                      <*> (o .: "MUNIC_NM")
+                      <*> clean "MUNIC_NM"
                       <*> (o .: "OBJECTID")
                       <*> (o .: "PID")
-                      <*> (o .: "OWNER_NM")
+                      <*> clean "OWNER_NM"
+                        
+                      <*> clean "STREET_NM"
+                      <*> (o .: "HOUSE_NO")
+    where
+      -- needs special handling because there's tons of crap whitespace
+      clean x = T.strip <$> o .: x
+
 
 data IDQueryResult = IDQueryResult { getIDList :: [Integer]
                                    } deriving (Show)
@@ -69,9 +83,16 @@ instance ToRecord FeatureLookup where
 
 
 instance ToRecord Feature where
-  toRecord feat = record [toField owner, toField zip]
+  toRecord feat = record row_fields
     where
-      owner = getOwnerName attrs
-      zip = getZipCode attrs
+      -- new fields go here
+      field_accessors = [ getObjectPID
+                        , getOwnerName
+                        , getStreetName
+                        , getZipCode
+                        ]
+
+      row_fields = fmap toField $ [f attrs | f <- field_accessors]
       attrs = featureAttributes feat
+
 
