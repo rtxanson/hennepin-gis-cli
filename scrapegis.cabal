@@ -18,9 +18,9 @@ Executable scrapegis
       src
   build-depends:
       base >= 4 && < 5
-    , lens
-    , aeson
-    , wreq
+    , lens 
+    , aeson == 0.7.0.4
+    , wreq == 0.1.0.1
     , docopt
     , cassava
     , bytestring

@@ -44,10 +44,9 @@ queryToCSV Nothing = "" :: B.ByteString
 
 main = do
   opts <- optionsWithUsageFile "Usage.txt"
-  -- print opts
 
   when (opts `isPresent` (command "query")) $ do
-    query_string <- opts `getArg` (argument "query_string")
+    query_string <- opts `getArg` (argument "<query_string>")
     let dataSource = if opts `isPresent` (longOption "mock")
                            then Mock.getHenCountyRecords
                            else Mock.getHenCountyRecords
