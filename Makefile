@@ -39,5 +39,5 @@ deps:
 # cabal build && cabal test
 
 init:
-	cabal sandbox init --sandbox ../../.cabal-sandbox
+	cabal sandbox init --sandbox sandbox
 
