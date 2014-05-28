@@ -52,7 +52,7 @@ concatenateResults ms = fs
 
 main :: IO ()
 main = do
-  usage <- getDataFileName "Usage.txt"
+  usage <- getDataFileName "src/Usage.txt"
   opts <- optionsWithUsageFile usage
 
   let post_processing = if opts `isPresent` (longOption "csv")

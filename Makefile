@@ -9,7 +9,7 @@ BUILD_FLAGS := "-j$(NUMBER_OF_CORES)"
 #   sh "cabal test"
 # end
 
-build: init deps
+build_sandbox: init_sandbox deps
 	cabal install $(BUILD_FLAGS) --only-dependencies
 	cabal configure
 	cabal build
@@ -38,7 +38,22 @@ deps:
 # cabal configure --enable-tests --disable-optimization --disable-library-profiling
 # cabal build && cabal test
 
-init:
+init_sandbox:
 	cabal sandbox init --sandbox sandbox
 
-all: build
+all:
+	cabal configure
+	cabal build
+
+install:
+	cabal install
+
+clean_sandbox:
+	cabal sandbox delete
+	rm -rf sandbox/
+
+clean: clean_sandbox
+	rm -rf dist
+
+all_sandbox: build_sandbox
+
