@@ -4,14 +4,13 @@ module Main where
 
 -- import Scrapegis        (run)
 
-import Scrapegis
+import Paths_scrapegis
 import Scrapegis.Hennepin as Henn
 import Scrapegis.MockHennepin as Mock
 import Scrapegis.Types
 
 -- Option parsing
 import Control.Monad (when)
-import Data.Char (toUpper)
 import System.Console.Docopt (optionsWithUsageFile, getArg, isPresent, command, argument, longOption)
 
 import Data.Text as T
@@ -52,8 +51,10 @@ concatenateResults ms = fs
 -- TODO: Main.hs: FailedConnectionException2 "gis.co.hennepin.mn.us" 80 False
 -- getAddrInfo: does not exist (nodename nor servname provided, or not known)
 
+main :: IO ()
 main = do
-  opts <- optionsWithUsageFile "Usage.txt"
+  usage <- getDataFileName "Usage.txt"
+  opts <- optionsWithUsageFile usage
 
   when (opts `isPresent` (command "query")) $ do
     query_string <- opts `getArg` (argument "<query_string>")
