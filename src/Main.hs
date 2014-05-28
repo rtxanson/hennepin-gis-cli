@@ -22,12 +22,13 @@ import System.Console.Docopt ( optionsWithUsageFile
 
 import Data.Text as T
 
-import Data.Csv (toRecord, encode)
+import Data.Csv (toRecord, encode, encodeByName, Header)
 
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as D8
 
 import Data.List as L
+import Data.Vector (fromList)
 
 query :: T.Text
 query = "ZIP_CD = '55401'"
@@ -35,6 +36,14 @@ query = "ZIP_CD = '55401'"
 queryToCSV :: Maybe FeatureLookup -> B.ByteString
 queryToCSV (Just recs) = encode $ L.map toRecord (getFeatures recs)
 queryToCSV Nothing = "" :: B.ByteString
+
+-- TODO: header
+-- queryToCSVWithHeader :: Maybe FeatureLookup -> B.ByteString
+-- queryToCSVWithHeader (Just recs) = encodeByName header records
+--     where
+--         header = (fromList feature_header_cols) :: Header
+--         records = L.map toRecord (getFeatures recs)
+-- queryToCSVWithHeader Nothing = "" :: B.ByteString
 
 featuresToCSV :: [Feature] -> B.ByteString
 featuresToCSV recs = encode $ L.map toRecord recs

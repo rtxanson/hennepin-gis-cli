@@ -7,6 +7,7 @@ module Scrapegis.Types
     , getIDList
     , getFeatures
     , featureAttributes
+    , feature_header_cols
     ) where
 
 import Data.Text as T
@@ -201,6 +202,27 @@ instance ToRecord FeatureLookup where
     where
       fieldname = displayFieldName feat
 
+feature_header_cols :: [String]
+feature_header_cols = [ "PID"
+                      , "HOUSE_NO"
+                      , "STREET_NM"
+                      , "ZIP_CD"
+                      , "OWNER_NM"
+                      , "TAXPAYER_NM"
+                      , "TAXPAYER_NM_1"
+                      , "TAXPAYER_NM_2"
+                      , "TAXPAYER_NM_3"
+                      , "ABBREV_ADDN_NM"
+                      , "BLOCK"
+                      , "LOT"
+                      , "HMSTD_CD1"
+                      , "HMSTD_CD1_NAME"
+                      , "ADDITION_NO"
+                      , "MKT_VAL_TOT"
+                      , "TAX_TOT"
+                      , "FORFEIT_LAND_IND"
+                      , "BUILD_YR"
+                      ]
 
 instance ToRecord Feature where
   toRecord feat = record row_fields
