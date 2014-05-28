@@ -10,16 +10,23 @@ For testing:
     make all_sandbox
     make install
 
-This will create a sandbox and install all dependencies and stuff there. Binary ends up in:
+This will create a sandbox and build all dependencies and stuff there. Binary ends up in:
 
     ./dist/build/scrapegis/scrapegis
+
+But if you install, it will end up in the sandbox install path:
+
+    ./sandbox/bin/scrapegis
 
 Otherwise for reals:
 
     make all
     make install
 
-Or if you're used to cabal:
+And this will install like normal to a system location (usr/local/bin or whatever)
+
+### Cabal reference 
+#### (ignore if above works)
 
     ( cabal sandbox init --sandbox sandbox )
     ( cabal install --only-dependencies --enable-tests )
