@@ -1,4 +1,5 @@
 Usage: 
+  scrapegis fetch city [--csv]
   scrapegis query [--mock] [--csv] <query_string>
 
 Options:

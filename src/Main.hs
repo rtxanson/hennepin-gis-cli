@@ -2,6 +2,8 @@
 
 module Main where
 
+import System.IO (stderr, hPutStrLn)
+
 import Paths_scrapegis
 import Scrapegis.Hennepin as Henn
 import Scrapegis.MockHennepin as Mock
@@ -53,20 +55,27 @@ main = do
   usage <- getDataFileName "Usage.txt"
   opts <- optionsWithUsageFile usage
 
+  let post_processing = if opts `isPresent` (longOption "csv")
+                                then featuresToCSV
+                                else featuresToCSV
+
+  let dataSource = if opts `isPresent` (longOption "mock")
+                         then Mock.getHenCountyRecords
+                         else Henn.getHenCountyRecords
+
+  when (opts `isPresent` (command "fetch")) $ do
+    let query_string = "MUNIC_CD = '01' (minneapolis)"
+    hPutStrLn stderr $ "  Querying with: " ++ query_string
+
+    records <- dataSource (T.pack query_string)
+    let recs = post_processing $ concatenateResults records
+    D8.putStrLn recs
+
   when (opts `isPresent` (command "query")) $ do
     query_string <- opts `getArg` (argument "<query_string>")
 
-    let post_processing = if opts `isPresent` (longOption "csv")
-                                  then featuresToCSV
-                                  else featuresToCSV
-
-    let dataSource = if opts `isPresent` (longOption "mock")
-                           then Mock.getHenCountyRecords
-                           else Henn.getHenCountyRecords
-
-
     -- TODO: with optional object KML field
-    -- TODO: chunk size option. default, 900? 
+    -- TODO: option to specify chunk size. default, 900? 
     -- TODO: output as stuff becomes available-- don't need to store in mem.
     --
     records <- dataSource (T.pack query_string)
