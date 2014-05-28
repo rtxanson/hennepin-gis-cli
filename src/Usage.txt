@@ -1,0 +1,7 @@
+Usage: 
+  scrapegis query [--mock] [--csv] <query_string>
+
+Options:
+  -m, --mock    Use mocked data
+  -c, --csv     Output to CSV
+
