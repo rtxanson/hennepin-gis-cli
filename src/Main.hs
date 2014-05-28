@@ -18,6 +18,7 @@ import System.Console.Docopt ( optionsWithUsageFile
                              , command
                              , argument
                              , longOption
+                             , Arguments
                              )
 
 import Data.Text as T
@@ -59,35 +60,47 @@ concatenateResults ms = fs
 -- TODO: Main.hs: FailedConnectionException2 "gis.co.hennepin.mn.us" 80 False
 -- getAddrInfo: does not exist (nodename nor servname provided, or not known)
 
+run :: Arguments -> IO ()
+run opts = do
+    -- Begin option processing
+    let post_processing = if whenOpt "csv"
+                              then featuresToCSV
+                              else featuresToCSV
+  
+    let dataSource = if whenOpt "mock"
+                           then Mock.getHenCountyRecords
+                           else Henn.getHenCountyRecords
+  
+    whenCmd "fetch" $ do
+      let query_string = "MUNIC_CD = '01' (minneapolis)"
+      hPutStrLn stderr $ "  Querying with: " ++ query_string
+  
+      records <- dataSource (T.pack query_string)
+      let recs = post_processing $ concatenateResults records
+      D8.putStrLn recs
+  
+    whenCmd "query" $ do
+      query_string <- getOpt "<query_string>"
+  
+      -- TODO: with optional object KML field
+      -- TODO: option to specify chunk size. default, 900? 
+      -- TODO: output as stuff becomes available-- don't need to store in mem.
+      --
+      records <- dataSource (T.pack query_string)
+      let recs = post_processing $ concatenateResults records
+      D8.putStrLn recs
+
+  where
+      -- Some docopt shortcuts
+      let whenCmd x = when (opts `isPresent` (command x))
+      let whenOpt x = opts `isPresent` (longOption x)
+      let getOpt  x = opts `getArg` (argument x)
+
+
 main :: IO ()
 main = do
   usage <- getDataFileName "src/Usage.txt"
   opts <- optionsWithUsageFile usage
 
-  let post_processing = if opts `isPresent` (longOption "csv")
-                                then featuresToCSV
-                                else featuresToCSV
-
-  let dataSource = if opts `isPresent` (longOption "mock")
-                         then Mock.getHenCountyRecords
-                         else Henn.getHenCountyRecords
-
-  when (opts `isPresent` (command "fetch")) $ do
-    let query_string = "MUNIC_CD = '01' (minneapolis)"
-    hPutStrLn stderr $ "  Querying with: " ++ query_string
-
-    records <- dataSource (T.pack query_string)
-    let recs = post_processing $ concatenateResults records
-    D8.putStrLn recs
-
-  when (opts `isPresent` (command "query")) $ do
-    query_string <- opts `getArg` (argument "<query_string>")
-
-    -- TODO: with optional object KML field
-    -- TODO: option to specify chunk size. default, 900? 
-    -- TODO: output as stuff becomes available-- don't need to store in mem.
-    --
-    records <- dataSource (T.pack query_string)
-    let recs = post_processing $ concatenateResults records
-    D8.putStrLn recs
+  run opts
 
