@@ -11,16 +11,21 @@ import Scrapegis.Types
 
 -- Option parsing
 import Control.Monad (when)
-import System.Console.Docopt (optionsWithUsageFile, getArg, isPresent, command, argument, longOption)
+
+import System.Console.Docopt ( optionsWithUsageFile
+                             , getArg
+                             , isPresent
+                             , command
+                             , argument
+                             , longOption
+                             )
 
 import Data.Text as T
 
-import Data.Csv (toRecord, encode, Record)
+import Data.Csv (toRecord, encode)
 
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as D8
-
-import Control.Applicative
 
 import Data.List as L
 
@@ -42,12 +47,6 @@ concatenateResults :: [Maybe FeatureLookup] -> [Feature]
 concatenateResults ms = fs
     where fs = L.concat (L.map justFeatures ms)
 
-
--- TODO: one more example of output
--- queryToJSON :: Maybe FeatureLookup -> B.ByteString
--- queryToJSON (Just recs) = encode $ fmap toRecord (getFeatures recs)
--- queryToJSON Nothing = "" :: B.ByteString
-
 -- TODO: Main.hs: FailedConnectionException2 "gis.co.hennepin.mn.us" 80 False
 -- getAddrInfo: does not exist (nodename nor servname provided, or not known)
 
@@ -67,6 +66,8 @@ main = do
                            then Mock.getHenCountyRecords
                            else Henn.getHenCountyRecords
 
+
+    -- TODO: with optional object KML field
     -- TODO: chunk size option. default, 900? 
     -- TODO: output as stuff becomes available-- don't need to store in mem.
     --

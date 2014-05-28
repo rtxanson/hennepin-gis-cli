@@ -16,25 +16,11 @@ import Data.Map as M
 import Control.Applicative
 import Data.Csv (toRecord, toField, ToRecord, record)
 
-cleanField x = T.strip <$> x
-
--- TODO: all of the fields in this mapping are kind of crazy and need to be
--- handled. For now just a subset to get the concept working.
+import Control.Monad (mzero)
 
 -- TODO: aim for this ordering
 --
 -- "PID","HOUSE_NO","STREET_NM","PROCESSED_ADDR","ZIP_CD","OWNER_NM","TAXPAYER_NM","TAXPAYER_NM_1","TAXPAYER_NM_2","TAXPAYER_NM_3","ABBREV_ADDN_NM","BLOCK","LOT","HMSTD_CD1","HMSTD_CD1_NAME","ADDITION_NO","MKT_VAL_TOT","TAX_TOT","FORFEIT_LAND_IND","BUILD_YR","ABSTR_TORRENS_CD","TORRENS_TYP","CONDO_NO","CONTIG_IND1","CO_OP_IND","MUNIC_CD","MUNIC_NM","NET_TAX_CAPACITY","EST_BLDG_MKT_VAL1","EST_BLDG_MKT_VAL2","EST_BLDG_MKT_VAL3","EST_BLDG_MKT_VAL4","EST_LAND_MKT_VAL1","EST_LAND_MKT_VAL2","EST_LAND_MKT_VAL3","EST_LAND_MKT_VAL4","FEATURECODE","FRAC_HOUSE_NO","MAILING_MUNIC_CD","MAILING_MUNIC_NM","METES_BNDS1","METES_BNDS2","METES_BNDS3","METES_BNDS4","MORE_METES_BNDS_IND","MULTI_ADDR_IND","OBJECTID","PARCEL_AREA","PID_TEXT","PROPERTY_STATUS_CD","PROPERTY_TYPE_CD1","PROPERTY_TYPE_CD1_NAME","PROPERTY_TYPE_CD2","PROPERTY_TYPE_CD3","PROPERTY_TYPE_CD4","SALE_CODE","SALE_CODE_NAME","SALE_DATE","SALE_PRICE","SCHOOL_DIST_NO","SEWER_DIST_NO","STATE_CD","Shape.area","Shape.len","TIF_PROJECT_NO","WATERSHED_NO"
-
--- .. TODO: with optional object KML field
---      getZipCode :: T.Text
---    , getMunicipalityName :: T.Text
---    , getObjectID :: Integer
---    , getObjectPID :: T.Text
---    , getOwnerName :: T.Text
---
---    , getStreetName :: T.Text
---    , getHouseNumber :: Integer
---    } deriving (Show)
 
 data FeatureAttributes = FeatureAttributes {
       getObjectPID :: T.Text
@@ -108,19 +94,19 @@ instance FromJSON FeatureAttributes where
   parseJSON (Object o) = 
     FeatureAttributes <$> (o .: "PID")
                       <*> (o .: "HOUSE_NO")
-                      <*> (o .: "STREET_NM")
+                      <*> clean "STREET_NM"
                       <*> (o .: "ZIP_CD")
-                      <*> (o .: "OWNER_NM")
-                      <*> (o .: "TAXPAYER_NM")
-                      <*> (o .: "TAXPAYER_NM_1")
-                      <*> (o .: "TAXPAYER_NM_2")
-                      <*> (o .: "TAXPAYER_NM_3")
+                      <*> clean "OWNER_NM"
+                      <*> clean "TAXPAYER_NM"
+                      <*> clean "TAXPAYER_NM_1"
+                      <*> clean "TAXPAYER_NM_2"
+                      <*> clean "TAXPAYER_NM_3"
                       <*> (o .: "ABBREV_ADDN_NM")
                       <*> (o .: "BLOCK")
                       <*> (o .: "LOT")
                       <*> (o .: "HMSTD_CD1")
                       <*> (o .: "HMSTD_CD1_NAME")
-                      <*> (o .: "ADDITION_NO")
+                      <*> clean "ADDITION_NO"
                       <*> (o .: "MKT_VAL_TOT")
                       <*> (o .: "TAX_TOT")
                       <*> (o .: "FORFEIT_LAND_IND")
@@ -175,18 +161,22 @@ instance FromJSON FeatureAttributes where
       -- needs special handling because there's tons of crap whitespace
       clean x = T.strip <$> o .: x
 
+  parseJSON  _ = mzero
+
 
 data IDQueryResult = IDQueryResult { getIDList :: [Integer]
                                    } deriving (Show)
 
 instance FromJSON IDQueryResult where
   parseJSON (Object o) = IDQueryResult <$> (o .: "objectIds")
+  parseJSON  _ = mzero
 
 data Feature = Feature { featureAttributes :: FeatureAttributes
                        } deriving (Show)
 
 instance FromJSON Feature where
   parseJSON (Object o) = Feature <$> o .: "attributes"
+  parseJSON  _ = mzero
 
 
 data FeatureLookup = FeatureLookup { getFeatures :: [Feature]
@@ -203,6 +193,7 @@ instance FromJSON FeatureLookup where
                                        <*> o .: "fieldAliases"
                                        <*> o .: "spatialReference"
                                        <*> o .: "geometryType"
+  parseJSON  _ = mzero
 
 
 instance ToRecord FeatureLookup where
@@ -238,5 +229,4 @@ instance ToRecord Feature where
 
       row_fields = fmap toField $ [f attrs | f <- field_accessors]
       attrs = featureAttributes feat
-
 

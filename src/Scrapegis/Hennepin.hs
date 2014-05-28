@@ -11,15 +11,15 @@ import Network.Wreq
 
 import Control.Applicative
 import Control.Lens
-import Control.Monad
 
-import Data.List as L
 import Data.Text as T
-import Data.Map as M
+import Data.List as L
 
 import qualified Data.ByteString.Lazy as B
 
 import Data.Aeson
+
+import System.IO (stderr, hPutStrLn)
 
 decodeIDResponseToJSON :: Response B.ByteString -> Maybe IDQueryResult
 decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
@@ -27,7 +27,8 @@ decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
 decodeRecResponseToJSON :: Response B.ByteString -> Maybe FeatureLookup
 decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
 
-hengishost =  "http://gis.co.hennepin.mn.us/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"
+hengishost :: String
+hengishost = "http://gis.co.hennepin.mn.us/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"
 
 getRecordByIds :: [Integer] -> IO (Response B.ByteString)
 getRecordByIds ids = post url args
@@ -57,12 +58,16 @@ idReq querystring = getWith opts url
 -- | TODO: finish up the chunking part. For now this is good enough for
 -- | testing.
 
--- TODO: note that this can basically be replaced by mapM: mapM getRecordByIDs chunks
+-- TODO: note that this can basically be replaced by mapM: mapM getRecordByIDs
+-- chunks, but having output about chunk status is great.
+--
 fetchChunks :: [[Integer]] -> IO [Maybe FeatureLookup]
 fetchChunks [] = return []
 fetchChunks (first:rest) = do
-   -- TODO: stderr here, also list chunk x of total
-    print "Fetching chunk"
+    let remaining_count = L.length rest
+    if remaining_count > 0 then hPutStrLn stderr $ "Requests remaining: " ++ (show $ L.length rest)
+    	                   else hPutStrLn stderr "Requesting..."
+
     m <- getRecordByIds first -- :: Response B.ByteString
     let rs = decodeRecResponseToJSON m
     mbs <- fetchChunks rest

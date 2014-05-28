@@ -41,3 +41,4 @@ deps:
 init:
 	cabal sandbox init --sandbox sandbox
 
+all: build

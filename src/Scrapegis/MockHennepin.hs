@@ -30,8 +30,10 @@ readAndDecodeJSONIDResult f_str = decode <$> (readJSONFile f_str)
 
 getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
 getHenCountyRecords query_string = do
+    putStrLn $ unpack query_string
     m <- readAndDecodeJSONIDResult "test_data/object_ids.json"
     let ids = getIDs m
+    putStrLn $ show ids
 
     mrecs <- readAndDecodeJSONFeatures "test_data/two_json.json"
     return $ [mrecs]
