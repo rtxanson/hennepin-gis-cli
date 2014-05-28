@@ -66,6 +66,9 @@ main = do
                            then Mock.getHenCountyRecords
                            else Henn.getHenCountyRecords
 
+    -- TODO: chunk size option. default, 900? 
+    -- TODO: output as stuff becomes available-- don't need to store in mem.
+    --
     records <- dataSource (T.pack query_string)
     let recs = post_processing $ concatenateResults records
     D8.putStrLn recs

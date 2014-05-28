@@ -30,12 +30,12 @@ decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
 hengishost =  "http://gis.co.hennepin.mn.us/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"
 
 getRecordByIds :: [Integer] -> IO (Response B.ByteString)
-getRecordByIds ids = postWith opts url (partText "")
+getRecordByIds ids = post url args
   where
-    opts = defaults & param "objectIds" .~ [ids_as_string]
-                    & param "f" .~ ["json"]
-                    & param "outFields" .~ ["*"]
-                    & header "Accept" .~ ["application/json"]
+    args = [ "objectIds" := (ids_as_string :: T.Text)
+           , "f" := ("json" :: T.Text)
+           , "outFields" := ("*" :: T.Text)
+           ] 
     url = hengishost
 
     -- IDs need to be one string joined with comma
@@ -44,7 +44,7 @@ getRecordByIds ids = postWith opts url (partText "")
     comma = T.pack ", "
 
 idReq :: Text -> IO (Response B.ByteString)
-idReq querystring = postWith opts url (partText "")
+idReq querystring = getWith opts url
   where
     opts = defaults & param "where" .~ [querystring]
                     & param "f" .~ ["json"]
@@ -71,7 +71,7 @@ fetchChunks (first:rest) = do
 getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
 getHenCountyRecords query_string = do
     m <- decodeIDResponseToJSON <$> idReq query_string
-    let chunks = chunkArray 100 (getIDs m)
+    let chunks = chunkArray 900 (getIDs m)
     bbq <- fetchChunks chunks
     return bbq
 
