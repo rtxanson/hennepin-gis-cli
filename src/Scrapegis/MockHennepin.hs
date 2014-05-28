@@ -13,6 +13,8 @@ import Control.Applicative
 
 import qualified Data.ByteString.Lazy as B
 
+import Data.Text
+
 import Data.Aeson
 
 readJSONFile :: String -> IO B.ByteString
@@ -26,13 +28,13 @@ readAndDecodeJSONFeatures f_str = decode <$> (readJSONFile f_str)
 readAndDecodeJSONIDResult :: String -> IO (Maybe IDQueryResult)
 readAndDecodeJSONIDResult f_str = decode <$> (readJSONFile f_str)
 
-
+getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
 getHenCountyRecords query_string = do
     m <- readAndDecodeJSONIDResult "test_data/object_ids.json"
     let ids = getIDs m
 
     mrecs <- readAndDecodeJSONFeatures "test_data/two_json.json"
-    return mrecs
+    return $ [mrecs]
   where
     getIDs :: Maybe IDQueryResult -> [Integer]
     getIDs (Just array) = getIDList array

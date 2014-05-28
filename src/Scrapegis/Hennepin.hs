@@ -30,7 +30,7 @@ decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
 hengishost =  "http://gis.co.hennepin.mn.us/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"
 
 getRecordByIds :: [Integer] -> IO (Response B.ByteString)
-getRecordByIds ids = getWith opts url
+getRecordByIds ids = postWith opts url (partText "")
   where
     opts = defaults & param "objectIds" .~ [ids_as_string]
                     & param "f" .~ ["json"]
@@ -44,7 +44,7 @@ getRecordByIds ids = getWith opts url
     comma = T.pack ", "
 
 idReq :: Text -> IO (Response B.ByteString)
-idReq querystring = getWith opts url
+idReq querystring = postWith opts url (partText "")
   where
     opts = defaults & param "where" .~ [querystring]
                     & param "f" .~ ["json"]
@@ -57,49 +57,28 @@ idReq querystring = getWith opts url
 -- | TODO: finish up the chunking part. For now this is good enough for
 -- | testing.
 
-getChunk :: [[Integer]] -> IO [Maybe FeatureLookup]
-getChunk [] = return []
-getChunk (first:rest) = do
-    recs <- getRecordByIds first
-    let mrec = decodeRecResponseToJSON recs
-    when (L.length rest > 0) $ return $ mrec : getChunk rest
+-- TODO: note that this can basically be replaced by mapM: mapM getRecordByIDs chunks
+fetchChunks :: [[Integer]] -> IO [Maybe FeatureLookup]
+fetchChunks [] = return []
+fetchChunks (first:rest) = do
+   -- TODO: stderr here, also list chunk x of total
+    print "Fetching chunk"
+    m <- getRecordByIds first -- :: Response B.ByteString
+    let rs = decodeRecResponseToJSON m
+    mbs <- fetchChunks rest
+    return $ rs : mbs
 
--- interpretLines :: Map.Map String [Char] -> [[String]] -> IO ()
--- interpretLines cache [] = putStrLn ""
--- interpretLines cache chunks = do
---     let chunk:rest = chunks
---     (cache, sub_lines) <- lookupLines cache $ unlines chunk
---     let prtlines = unlines [a | a <- lines sub_lines, length a > 0]
---     putStrLn prtlines
---     when (length rest > 0) $ interpretLines cache rest
-
-
-getHenCountyRecords' :: Text -> IO (Maybe FeatureLookup)
-getHenCountyRecords' query_string = do
-    r <- idReq query_string
-    let m = decodeIDResponseToJSON r
-    let ids = getIDs m
-    let id_chunks = chunkArray 5 ids
-    print id_chunks
-    mrec <- getChunk id_chunks
-    return mrec 
-  where
-    getIDs :: Maybe IDQueryResult -> [Integer]
-    getIDs (Just array) = getIDList array
-    getIDs Nothing = []
-
-getHenCountyRecords :: Text -> IO (Maybe FeatureLookup)
+getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
 getHenCountyRecords query_string = do
-    r <- idReq query_string
-    let m = decodeIDResponseToJSON r
-    let ids = getIDs m
-    let first_five =  L.take 5 ids
-    print first_five
-    print "querying first chunk"
-    recs <- getRecordByIds first_five
-    let mrec = decodeRecResponseToJSON recs
-    return mrec
+    m <- decodeIDResponseToJSON <$> idReq query_string
+    let chunks = chunkArray 100 (getIDs m)
+    bbq <- fetchChunks chunks
+    return bbq
+
   where
+
     getIDs :: Maybe IDQueryResult -> [Integer]
     getIDs (Just array) = getIDList array
     getIDs Nothing = []
+
+
