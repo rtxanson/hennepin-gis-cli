@@ -2,8 +2,6 @@
 
 module Main where
 
--- import Scrapegis        (run)
-
 import Paths_scrapegis
 import Scrapegis.Hennepin as Henn
 import Scrapegis.MockHennepin as Mock

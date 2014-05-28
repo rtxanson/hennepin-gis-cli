@@ -6,6 +6,7 @@ module Scrapegis.Hennepin
 
 import Scrapegis.Types
 import Scrapegis.Utils
+import Scrapegis.Settings
 
 import Network.Wreq
 
@@ -27,17 +28,13 @@ decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
 decodeRecResponseToJSON :: Response B.ByteString -> Maybe FeatureLookup
 decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
 
-hengishost :: String
-hengishost = "http://gis.co.hennepin.mn.us/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"
-
 getRecordByIds :: [Integer] -> IO (Response B.ByteString)
-getRecordByIds ids = post url args
+getRecordByIds ids = post hennepin_gis_host args
   where
     args = [ "objectIds" := (ids_as_string :: T.Text)
            , "f" := ("json" :: T.Text)
            , "outFields" := ("*" :: T.Text)
            ] 
-    url = hengishost
 
     -- IDs need to be one string joined with comma
     ids_as_string = T.intercalate comma id_strings
@@ -45,13 +42,12 @@ getRecordByIds ids = post url args
     comma = T.pack ", "
 
 idReq :: Text -> IO (Response B.ByteString)
-idReq querystring = getWith opts url
+idReq querystring = getWith opts hennepin_gis_host
   where
     opts = defaults & param "where" .~ [querystring]
                     & param "f" .~ ["json"]
                     & param "returnIDsOnly" .~ ["true"]
                     & header "Accept" .~ ["application/json"]
-    url = hengishost
 
 -- | This runs two queries that result in stuff: first to get the IDs, and then the remaining queries actually get the objects.
 --
@@ -85,5 +81,4 @@ getHenCountyRecords query_string = do
     getIDs :: Maybe IDQueryResult -> [Integer]
     getIDs (Just array) = getIDList array
     getIDs Nothing = []
-
 
