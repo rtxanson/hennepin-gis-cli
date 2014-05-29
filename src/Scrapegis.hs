@@ -4,7 +4,6 @@ module Scrapegis
     ( run
     ) where
 
-
 import System.IO (stderr, hPutStrLn)
 
 import Scrapegis.Hennepin as Henn
@@ -24,6 +23,7 @@ import System.Console.Docopt ( optionsWithUsageFile
                              )
 
 import Data.Text as T
+import Data.List as L
 
 import Data.Csv ( toRecord
                 , encode
@@ -34,38 +34,15 @@ import Data.Csv ( toRecord
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as D8
 
-import Data.List as L
--- import Data.Vector (fromList)
-
--- queryToCSV :: Maybe FeatureLookup -> B.ByteString
--- queryToCSV (Just recs) = encode $ L.map toRecord (getFeatures recs)
--- queryToCSV Nothing = "" :: B.ByteString
-
--- TODO: header
--- queryToCSVWithHeader :: Maybe FeatureLookup -> B.ByteString
--- queryToCSVWithHeader (Just recs) = encodeByName header records
---     where
---         header = (fromList feature_header_cols) :: Header
---         records = L.map toRecord (getFeatures recs)
--- queryToCSVWithHeader Nothing = "" :: B.ByteString
-
-featuresToCSV :: [Feature] -> B.ByteString
-featuresToCSV recs = encode $ L.map toRecord recs
-
-justFeatures :: Maybe FeatureLookup -> [Feature]
-justFeatures (Just f) = getFeatures f
-justFeatures Nothing = []
-
-concatenateResults :: [Maybe FeatureLookup] -> [Feature]
-concatenateResults ms = fs
-    where fs = L.concat (L.map justFeatures ms)
-
 -- TODO: Main.hs: FailedConnectionException2 "gis.co.hennepin.mn.us" 80 False
 -- getAddrInfo: does not exist (nodename nor servname provided, or not known)
+-- TODO: with optional object KML field
+
+-- TODO: option to specify chunk size. default, 900? 
+-- TODO: output as stuff becomes available-- don't need to store in mem.
 
 run :: Arguments -> IO ()
 run opts = do
-    -- Begin option processing
   
     whenCmd "fetch" $ do
 
@@ -85,10 +62,6 @@ run opts = do
     whenCmd "query" $ do
       query_string <- getOpt "<query_string>"
   
-      -- TODO: with optional object KML field
-      -- TODO: option to specify chunk size. default, 900? 
-      -- TODO: output as stuff becomes available-- don't need to store in mem.
-      --
       doIt query_string
 
   where
@@ -115,3 +88,31 @@ run opts = do
           records <- doQuery q
           let recs = cleanResult records
           D8.putStrLn recs
+
+-- should shift these functions to Utils
+
+-- import Data.Vector (fromList)
+
+-- queryToCSV :: Maybe FeatureLookup -> B.ByteString
+-- queryToCSV (Just recs) = encode $ L.map toRecord (getFeatures recs)
+-- queryToCSV Nothing = "" :: B.ByteString
+
+-- TODO: header
+-- queryToCSVWithHeader :: Maybe FeatureLookup -> B.ByteString
+-- queryToCSVWithHeader (Just recs) = encodeByName header records
+--     where
+--         header = (fromList feature_header_cols) :: Header
+--         records = L.map toRecord (getFeatures recs)
+-- queryToCSVWithHeader Nothing = "" :: B.ByteString
+
+featuresToCSV :: [Feature] -> B.ByteString
+featuresToCSV recs = encode $ L.map toRecord recs
+
+justFeatures :: Maybe FeatureLookup -> [Feature]
+justFeatures (Just f) = getFeatures f
+justFeatures Nothing = []
+
+concatenateResults :: [Maybe FeatureLookup] -> [Feature]
+concatenateResults ms = fs
+    where fs = L.concat (L.map justFeatures ms)
+
