@@ -1,5 +1,6 @@
 Usage: 
   scrapegis fetch city [--csv]
+  scrapegis fetch zip <zip_code>
   scrapegis query [--mock] [--csv] <query_string>
 
 Options:

@@ -37,9 +37,6 @@ import qualified Data.ByteString.Lazy.Char8 as D8
 import Data.List as L
 -- import Data.Vector (fromList)
 
-query :: T.Text
-query = "ZIP_CD = '55401'"
-
 -- queryToCSV :: Maybe FeatureLookup -> B.ByteString
 -- queryToCSV (Just recs) = encode $ L.map toRecord (getFeatures recs)
 -- queryToCSV Nothing = "" :: B.ByteString
@@ -71,12 +68,20 @@ run opts = do
     -- Begin option processing
   
     whenCmd "fetch" $ do
-      let query_string = "MUNIC_CD = '01' (minneapolis)"
-      hPutStrLn stderr $ "  Querying with: " ++ query_string
+      whenCmd "city" $ do 
+        let query_string = "MUNIC_CD = '01' (minneapolis)"
+        hPutStrLn stderr $ "  Querying with: " ++ query_string
+        records <- doQuery query_string
+        let recs = cleanResult records
+        D8.putStrLn recs
+
+      whenCmd "zip" $ do
+        zip_cd <- getOpt "<zip_code>"
+        let query_string = "ZIP_CD ='" ++ zip_cd ++ "'" 
   
-      records <- doQuery query_string
-      let recs = cleanResult records
-      D8.putStrLn recs
+        records <- doQuery query_string
+        let recs = cleanResult records
+        D8.putStrLn recs
   
     whenCmd "query" $ do
       query_string <- getOpt "<query_string>"
