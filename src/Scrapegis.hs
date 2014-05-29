@@ -68,6 +68,7 @@ run opts = do
     -- Begin option processing
   
     whenCmd "fetch" $ do
+
       whenCmd "city" $ do 
         let query_string = "MUNIC_CD = '01' (minneapolis)"
         hPutStrLn stderr $ "  Querying with: " ++ query_string
