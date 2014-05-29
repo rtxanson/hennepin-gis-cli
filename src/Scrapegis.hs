@@ -71,17 +71,15 @@ run opts = do
       whenCmd "city" $ do 
         let query_string = "MUNIC_CD = '01' (minneapolis)"
         hPutStrLn stderr $ "  Querying with: " ++ query_string
-        records <- doQuery query_string
-        let recs = cleanResult records
-        D8.putStrLn recs
+
+        doIt query_string
 
       whenCmd "zip" $ do
         zip_cd <- getOpt "<zip_code>"
         let query_string = "ZIP_CD ='" ++ zip_cd ++ "'" 
+        hPutStrLn stderr $ "  Querying with: " ++ query_string
   
-        records <- doQuery query_string
-        let recs = cleanResult records
-        D8.putStrLn recs
+        doIt query_string
   
     whenCmd "query" $ do
       query_string <- getOpt "<query_string>"
@@ -90,9 +88,7 @@ run opts = do
       -- TODO: option to specify chunk size. default, 900? 
       -- TODO: output as stuff becomes available-- don't need to store in mem.
       --
-      records <- doQuery query_string
-      let recs = cleanResult records
-      D8.putStrLn recs
+      doIt query_string
 
   where
       -- Processing funcs
@@ -112,3 +108,9 @@ run opts = do
       post_processing = if whenOpt "csv"
                             then featuresToCSV
                             else featuresToCSV
+
+      -- configured process
+      doIt q = do
+          records <- doQuery q
+          let recs = cleanResult records
+          D8.putStrLn recs
