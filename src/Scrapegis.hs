@@ -67,7 +67,7 @@ run opts = do
   where
       -- Processing funcs
       doQuery q = dataSource (T.pack q)
-      cleanResult r = post_processing $ concatenateResults r
+      cleanResult r = post_processing $ concatenateFeatures r
 
       -- Some docopt shortcuts
       whenCmd x = when $ opts `isPresent` (command x)
@@ -107,12 +107,4 @@ run opts = do
 
 featuresToCSV :: [Feature] -> B.ByteString
 featuresToCSV recs = encode $ L.map toRecord recs
-
-justFeatures :: Maybe FeatureLookup -> [Feature]
-justFeatures (Just f) = getFeatures f
-justFeatures Nothing = []
-
-concatenateResults :: [Maybe FeatureLookup] -> [Feature]
-concatenateResults ms = fs
-    where fs = L.concat (L.map justFeatures ms)
 

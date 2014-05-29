@@ -3,7 +3,9 @@
 module Scrapegis.Types
     ( IDQueryResult
     , Feature
+    , justFeatures
     , FeatureLookup
+    , concatenateFeatures
     , getIDList
     , getFeatures
     , featureAttributes
@@ -11,9 +13,10 @@ module Scrapegis.Types
     ) where
 
 import Data.Text as T
+import Data.List as L
+import Data.Map as M
 
 import Data.Aeson
-import Data.Map as M
 import Control.Applicative
 import Data.Csv (toRecord, toField, ToRecord, record)
 
@@ -179,6 +182,9 @@ instance FromJSON Feature where
   parseJSON (Object o) = Feature <$> o .: "attributes"
   parseJSON  _ = mzero
 
+justFeatures :: Maybe FeatureLookup -> [Feature]
+justFeatures (Just f) = getFeatures f
+justFeatures Nothing = []
 
 data FeatureLookup = FeatureLookup { getFeatures :: [Feature]
                                    , displayFieldName :: String
@@ -201,6 +207,10 @@ instance ToRecord FeatureLookup where
   toRecord feat = record [toField fieldname, toField fieldname]
     where
       fieldname = displayFieldName feat
+
+concatenateFeatures :: [Maybe FeatureLookup] -> [Feature]
+concatenateFeatures ms = fs
+    where fs = L.concat (L.map justFeatures ms)
 
 feature_header_cols :: [String]
 feature_header_cols = [ "PID"
