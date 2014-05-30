@@ -52,6 +52,12 @@ import qualified Data.ByteString.Lazy.Char8 as D8
 -- http://hackage.haskell.org/package/gps-0.2.4/docs/Data-GPS.html
 -- http://hackage.haskell.org/package/proj4-hs-bindings
 -- https://github.com/pavpen/proj4-hs-bindings
+--
+-- http://hackage.haskell.org/package/txt-sushi
+-- http://hackage.haskell.org/package/csv-conduit
+
+
+-- http://hackage.haskell.org/package/esqueleto-1.4.1.2/docs/Database-Esqueleto.html
 
 run :: Arguments -> IO ()
 run opts = do

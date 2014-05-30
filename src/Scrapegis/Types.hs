@@ -26,6 +26,10 @@ import Control.Monad (mzero)
 --
 -- "PID","HOUSE_NO","STREET_NM","PROCESSED_ADDR","ZIP_CD","OWNER_NM","TAXPAYER_NM","TAXPAYER_NM_1","TAXPAYER_NM_2","TAXPAYER_NM_3","ABBREV_ADDN_NM","BLOCK","LOT","HMSTD_CD1","HMSTD_CD1_NAME","ADDITION_NO","MKT_VAL_TOT","TAX_TOT","FORFEIT_LAND_IND","BUILD_YR","ABSTR_TORRENS_CD","TORRENS_TYP","CONDO_NO","CONTIG_IND1","CO_OP_IND","MUNIC_CD","MUNIC_NM","NET_TAX_CAPACITY","EST_BLDG_MKT_VAL1","EST_BLDG_MKT_VAL2","EST_BLDG_MKT_VAL3","EST_BLDG_MKT_VAL4","EST_LAND_MKT_VAL1","EST_LAND_MKT_VAL2","EST_LAND_MKT_VAL3","EST_LAND_MKT_VAL4","FEATURECODE","FRAC_HOUSE_NO","MAILING_MUNIC_CD","MAILING_MUNIC_NM","METES_BNDS1","METES_BNDS2","METES_BNDS3","METES_BNDS4","MORE_METES_BNDS_IND","MULTI_ADDR_IND","OBJECTID","PARCEL_AREA","PID_TEXT","PROPERTY_STATUS_CD","PROPERTY_TYPE_CD1","PROPERTY_TYPE_CD1_NAME","PROPERTY_TYPE_CD2","PROPERTY_TYPE_CD3","PROPERTY_TYPE_CD4","SALE_CODE","SALE_CODE_NAME","SALE_DATE","SALE_PRICE","SCHOOL_DIST_NO","SEWER_DIST_NO","STATE_CD","Shape.area","Shape.len","TIF_PROJECT_NO","WATERSHED_NO"
 
+-- | Each JSON result contains a list of `Feature` objects, which contains both
+-- | attributes and geographical information. FeatureAttributes handles only
+-- | the attribute section.
+
 data FeatureAttributes = FeatureAttributes {
       getObjectPID :: T.Text
     , getHouseNumber :: Integer
@@ -46,6 +50,8 @@ data FeatureAttributes = FeatureAttributes {
     , getTaxTot :: Integer
     , getForfeitLandInd :: T.Text
     , getBuildYear :: T.Text
+    , getMunicCode :: !Text
+    , getMunicName :: !Text
     -- , getAbstr_torrens_cd :: !Text
     -- , getTorrens_typ :: !Text
     -- , getCondo_no :: !Text
@@ -94,6 +100,8 @@ data FeatureAttributes = FeatureAttributes {
     -- , getWatershed_no :: !Text
     } deriving (Show)
 
+-- | Control parsing the JSON into a Haskell data type.
+
 instance FromJSON FeatureAttributes where
   parseJSON (Object o) = 
     FeatureAttributes <$> (o .: "PID")
@@ -105,23 +113,23 @@ instance FromJSON FeatureAttributes where
                       <*> clean "TAXPAYER_NM_1"
                       <*> clean "TAXPAYER_NM_2"
                       <*> clean "TAXPAYER_NM_3"
-                      <*> (o .: "ABBREV_ADDN_NM")
-                      <*> (o .: "BLOCK")
-                      <*> (o .: "LOT")
+                      <*> clean "ABBREV_ADDN_NM"
+                      <*> clean "BLOCK"
+                      <*> clean "LOT"
                       <*> (o .: "HMSTD_CD1")
-                      <*> (o .: "HMSTD_CD1_NAME")
+                      <*> clean "HMSTD_CD1_NAME"
                       <*> clean "ADDITION_NO"
                       <*> (o .: "MKT_VAL_TOT")
                       <*> (o .: "TAX_TOT")
-                      <*> (o .: "FORFEIT_LAND_IND")
+                      <*> clean "FORFEIT_LAND_IND"
                       <*> (o .: "BUILD_YR")
+                      <*> (o .: "MUNIC_CD")
+                      <*> clean "MUNIC_NM"
                       -- <*> (o .: "ABSTR_TORRENS_CD")
                       -- <*> (o .: "TORRENS_TYP")
                       -- <*> (o .: "CONDO_NO")
                       -- <*> (o .: "CONTIG_IND1")
                       -- <*> (o .: "CO_OP_IND")
-                      -- <*> (o .: "MUNIC_CD")
-                      -- <*> (o .: "MUNIC_NM")
                       -- <*> (o .: "NET_TAX_CAPACITY")
                       -- <*> (o .: "EST_BLDG_MKT_VAL1")
                       -- <*> (o .: "EST_BLDG_MKT_VAL2")
@@ -167,24 +175,37 @@ instance FromJSON FeatureAttributes where
 
   parseJSON  _ = mzero
 
+-- | This handles the JSON returned by the first object ID query. It returns no
+-- | data apart from the object IDs, which are later chunked and processed
+-- | FeatureLookups.
 
 data IDQueryResult = IDQueryResult { getIDList :: [Integer]
                                    } deriving (Show)
+
+-- | JSON parsing for IDQueryResult
 
 instance FromJSON IDQueryResult where
   parseJSON (Object o) = IDQueryResult <$> (o .: "objectIds")
   parseJSON  _ = mzero
 
+-- | This is returned in FeatureLookups queries.
+
 data Feature = Feature { featureAttributes :: FeatureAttributes
                        } deriving (Show)
+
+-- | JSON parsing for Feature objects. Simple for now.
 
 instance FromJSON Feature where
   parseJSON (Object o) = Feature <$> o .: "attributes"
   parseJSON  _ = mzero
 
+-- | Return a list of features or nothing depending on the result of the query.
+
 justFeatures :: Maybe FeatureLookup -> [Feature]
 justFeatures (Just f) = getFeatures f
 justFeatures Nothing = []
+
+-- | This is the result of querying a set of IDs.
 
 data FeatureLookup = FeatureLookup { getFeatures :: [Feature]
                                    , displayFieldName :: String
@@ -193,7 +214,8 @@ data FeatureLookup = FeatureLookup { getFeatures :: [Feature]
                                    , geometryType :: String
                                    } deriving (Show)
 
--- these all have to be in the same order as the fields above.
+-- | FeatureLookup JSON parsing.
+
 instance FromJSON FeatureLookup where
   parseJSON (Object o) = FeatureLookup <$> o .: "features"
                                        <*> o .: "displayFieldName"
@@ -202,6 +224,8 @@ instance FromJSON FeatureLookup where
                                        <*> o .: "geometryType"
   parseJSON  _ = mzero
 
+
+-- | FeatureLookup CSV serialization.
 
 instance ToRecord FeatureLookup where
   toRecord feat = record [toField fieldname, toField fieldname]
@@ -232,11 +256,17 @@ feature_header_cols = [ "PID"
                       , "TAX_TOT"
                       , "FORFEIT_LAND_IND"
                       , "BUILD_YR"
+                      , "MUNIC_CD"
+                      , "MUNIC_NM"
                       ]
 
 instance ToRecord Feature where
   toRecord feat = record row_fields
     where
+      -- TODO:
+      --   there's more data cleaning to be done, probably want to combine
+      --   taxpayer names, and address and such
+
       -- new fields go here
       field_accessors = [ getObjectPID
                         , (T.pack . show . getHouseNumber)
@@ -257,6 +287,8 @@ instance ToRecord Feature where
                         , (T.pack . show . getTaxTot)
                         , getForfeitLandInd
                         , getBuildYear
+                        , getMunicCode
+                        , getMunicName
                         ]
 
       row_fields = fmap toField $ [f attrs | f <- field_accessors]

@@ -28,6 +28,8 @@ readAndDecodeJSONFeatures f_str = decode <$> (readJSONFile f_str)
 readAndDecodeJSONIDResult :: String -> IO (Maybe IDQueryResult)
 readAndDecodeJSONIDResult f_str = decode <$> (readJSONFile f_str)
 
+-- | Fetch mock records. Really only meant for testing.
+
 getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
 getHenCountyRecords query_string = do
     putStrLn $ unpack query_string
