@@ -47,6 +47,12 @@ import qualified Data.ByteString.Lazy.Char8 as D8
 -- TODO: option to specify chunk size. default, 900? 
 -- TODO: output as stuff becomes available-- don't need to store in mem.
 
+
+-- TODO: output geojson polygons to kml snippets: https://hackage.haskell.org/package/geojson
+-- http://hackage.haskell.org/package/gps-0.2.4/docs/Data-GPS.html
+-- http://hackage.haskell.org/package/proj4-hs-bindings
+-- https://github.com/pavpen/proj4-hs-bindings
+
 run :: Arguments -> IO ()
 run opts = do
 
