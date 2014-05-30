@@ -4,7 +4,12 @@ module Scrapegis
     ( run
     ) where
 
-import System.IO (stderr, hPutStrLn)
+import System.IO ( stderr
+                 , hPutStrLn
+                 , hClose
+                 , openFile
+                 , IOMode(WriteMode)
+                 )
 
 import Scrapegis.Hennepin as Henn
 import Scrapegis.MockHennepin as Mock
@@ -13,8 +18,8 @@ import Scrapegis.Types
 -- Option parsing
 import Control.Monad (when)
 
-import System.Console.Docopt ( optionsWithUsageFile
-                             , getArg
+import System.Console.Docopt ( getArg
+                             , getArgWithDefault
                              , isPresent
                              , command
                              , argument
@@ -24,6 +29,7 @@ import System.Console.Docopt ( optionsWithUsageFile
 
 import Data.Text as T
 import Data.List as L
+-- import Data.Vector (fromList)
 
 import Data.Csv ( toRecord
                 , encode
@@ -43,26 +49,27 @@ import qualified Data.ByteString.Lazy.Char8 as D8
 
 run :: Arguments -> IO ()
 run opts = do
-  
+
     whenCmd "fetch" $ do
 
-      whenCmd "city" $ do 
-        let query_string = "MUNIC_CD = '01' (minneapolis)"
-        hPutStrLn stderr $ "  Querying with: " ++ query_string
+        whenCmd "city" $ do
+            let query_string = "MUNIC_CD = '01'" -- (minneapolis)
+            hPutStrLn stderr $ "  Querying with: " ++ query_string
+            hPutStrLn stderr $ "                 (minneapolis)"
 
-        doIt query_string
+            doIt query_string
 
-      whenCmd "zip" $ do
-        zip_cd <- getOpt "<zip_code>"
-        let query_string = "ZIP_CD ='" ++ zip_cd ++ "'" 
-        hPutStrLn stderr $ "  Querying with: " ++ query_string
-  
-        doIt query_string
-  
+        whenCmd "zip" $ do
+            zip_cd <- getOpt "<zip_code>"
+            let query_string = "ZIP_CD ='" ++ zip_cd ++ "'"
+            hPutStrLn stderr $ "  Querying with: " ++ query_string
+
+            doIt query_string
+
     whenCmd "query" $ do
-      query_string <- getOpt "<query_string>"
-  
-      doIt query_string
+        query_string <- getOpt "<query_string>"
+
+        doIt query_string
 
   where
       -- Processing funcs
@@ -83,11 +90,22 @@ run opts = do
                             then featuresToCSV
                             else featuresToCSV
 
+      output_file = getArgWithDefault opts "stdout" (longOption "out")
+
       -- configured process
       doIt q = do
           records <- doQuery q
           let recs = cleanResult records
-          D8.putStrLn recs
+          if output_file == "stdout"
+              then do
+                  D8.putStrLn recs
+              else do
+                  h <- openFile output_file WriteMode
+                  D8.hPut h recs
+                  hClose h
+                  hPutStrLn stderr $ "Written to: " ++ output_file
+
+          hPutStrLn stderr $ "Done."
 
 -- should shift these functions to Utils
 
@@ -98,11 +116,15 @@ run opts = do
 -- queryToCSV Nothing = "" :: B.ByteString
 
 -- TODO: header
+
 -- queryToCSVWithHeader :: Maybe FeatureLookup -> B.ByteString
--- queryToCSVWithHeader (Just recs) = encodeByName header records
+-- queryToCSVWithHeader (Just features) = encodeByName header records
 --     where
---         header = (fromList feature_header_cols) :: Header
---         records = L.map toRecord (getFeatures recs)
+--         -- This is what this is, but need: Header
+--         header :: Data.Vector.Vector String
+--         header = (fromList feature_header_cols)
+-- 
+--         records = L.map toRecord features
 -- queryToCSVWithHeader Nothing = "" :: B.ByteString
 
 featuresToCSV :: [Feature] -> B.ByteString
