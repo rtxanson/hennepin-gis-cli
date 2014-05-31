@@ -47,8 +47,8 @@ all:
 	cabal configure
 	cabal build
 
-install:
-	cabal install
+global-install:
+	cabal install --global
 
 clean_sandbox:
 	cabal sandbox delete

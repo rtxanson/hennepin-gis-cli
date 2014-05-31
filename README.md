@@ -11,6 +11,10 @@ dumping to CSV.
 This will install like normal to a system location (usr/local/bin or
 ~/.cabal/bin/ or whatever).
 
+NB, some systems you probably need
+
+    make global-install
+
 If it complains of missing dependencies, `make deps` should be sufficient, but
 don't do that unless there is a complaint.
 
