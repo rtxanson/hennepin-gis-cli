@@ -48,6 +48,8 @@ all:
 	cabal build
 
 global-install:
+	cabal configure
+	cabal deps
 	cabal install --global
 
 clean_sandbox:
