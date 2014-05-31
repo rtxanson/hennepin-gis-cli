@@ -22,52 +22,12 @@ import Data.Aeson
 
 import System.IO (stderr, hPutStrLn)
 
-decodeIDResponseToJSON :: Response B.ByteString -> Maybe IDQueryResult
-decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
+-- | * The main thing to know.
 
-decodeRecResponseToJSON :: Response B.ByteString -> Maybe FeatureLookup
-decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
-
-getRecordByIds :: [Integer] -> IO (Response B.ByteString)
-getRecordByIds ids = post hennepin_gis_host args
-  where
-    args = [ "objectIds" := (ids_as_string :: T.Text)
-           , "f" := ("json" :: T.Text)
-           , "outFields" := ("*" :: T.Text)
-           ] 
-
-    -- IDs need to be one string joined with comma
-    ids_as_string = T.intercalate comma id_strings
-    id_strings = T.pack <$> [show i | i <- ids]
-    comma = T.pack ", "
-
-idReq :: Text -> IO (Response B.ByteString)
-idReq querystring = getWith opts hennepin_gis_host
-  where
-    opts = defaults & param "where" .~ [querystring]
-                    & param "f" .~ ["json"]
-                    & param "returnIDsOnly" .~ ["true"]
-                    & header "Accept" .~ ["application/json"]
-
--- | This runs two queries that result in stuff: first to get the IDs, and then the remaining queries actually get the objects.
---
--- | TODO: finish up the chunking part. For now this is good enough for
--- | testing.
-
--- TODO: note that this can basically be replaced by mapM: mapM getRecordByIDs
--- chunks, but having output about chunk status is great.
---
-fetchChunks :: [[Integer]] -> IO [Maybe FeatureLookup]
-fetchChunks [] = return []
-fetchChunks (first:rest) = do
-    let remaining_count = L.length rest
-    if remaining_count > 0 then hPutStrLn stderr $ "Requests remaining: " ++ (show $ L.length rest)
-    	                   else hPutStrLn stderr "Requesting..."
-
-    m <- getRecordByIds first -- :: Response B.ByteString
-    let rs = decodeRecResponseToJSON m
-    mbs <- fetchChunks rest
-    return $ rs : mbs
+-- | This is the main access point to the Hennepin County GIS Property records.
+-- | It initiates two requests: one to fetch object IDs, and the second which
+-- | POSTs all the object IDs and returns actual objects. Requests falling under the 
+-- | second are chunked by 900, so larger requests may take some time.
 
 getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
 getHenCountyRecords query_string = do
@@ -82,3 +42,51 @@ getHenCountyRecords query_string = do
     getIDs (Just array) = getIDList array
     getIDs Nothing = []
 
+decodeIDResponseToJSON :: Response B.ByteString -> Maybe IDQueryResult
+decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
+
+decodeRecResponseToJSON :: Response B.ByteString -> Maybe FeatureLookup
+decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
+
+-- | Generates a response object for a list of object IDs.
+
+getRecordByIds :: [Integer] -> IO (Response B.ByteString)
+getRecordByIds ids = post hennepin_gis_host args
+  where
+    args = [ "objectIds" := (ids_as_string :: T.Text)
+           , "f" := ("json" :: T.Text)
+           , "outFields" := ("*" :: T.Text)
+           ] 
+
+    -- IDs need to be one string joined with comma
+    ids_as_string = T.intercalate comma id_strings
+    id_strings = T.pack <$> [show i | i <- ids]
+    comma = T.pack ", "
+
+-- | For a given querystring, this returns a Response containing matching
+-- | object IDs.
+
+idReq :: Text -> IO (Response B.ByteString)
+idReq querystring = getWith opts hennepin_gis_host
+  where
+    opts = defaults & param "where" .~ [querystring]
+                    & param "f" .~ ["json"]
+                    & param "returnIDsOnly" .~ ["true"]
+                    & header "Accept" .~ ["application/json"]
+
+-- | This runs two API queries that result in stuff: first gets the IDs, and then
+-- | the remaining queries actually get the objects.
+
+-- | For future learning: this could be easily replaced by mapM: `mapM getRecordByIDs chunks`.
+
+fetchChunks :: [[Integer]] -> IO [Maybe FeatureLookup]
+fetchChunks [] = return []
+fetchChunks (first:rest) = do
+    let remaining_count = L.length rest
+    if remaining_count > 0 then hPutStrLn stderr $ "Requests remaining: " ++ (show $ L.length rest)
+    	                   else hPutStrLn stderr "Requesting..."
+
+    m <- getRecordByIds first -- :: Response B.ByteString
+    let rs = decodeRecResponseToJSON m
+    mbs <- fetchChunks rest
+    return $ rs : mbs
