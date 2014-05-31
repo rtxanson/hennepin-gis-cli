@@ -65,6 +65,9 @@ run opts = do
     whenCmd "fetch" $ do
 
         whenCmd "city" $ do
+            -- EDINA: 24
+            -- ORONO: 38
+            -- RICHFIELD: 42
             let query_string = "MUNIC_CD = '01'" -- (minneapolis)
             hPutStrLn stderr $ "  Querying with: " ++ query_string
             hPutStrLn stderr $ "                 (minneapolis)"
@@ -73,10 +76,18 @@ run opts = do
 
         whenCmd "zip" $ do
             zip_cd <- getOpt "<zip_code>"
-            let query_string = "ZIP_CD ='" ++ zip_cd ++ "'"
+            let query_string = "ZIP_CD = '" ++ zip_cd ++ "'"
             hPutStrLn stderr $ "  Querying with: " ++ query_string
 
             doIt query_string
+
+        whenCmd "pid" $ do
+            pid <- getOpt "<pid>"
+            let query_string = "PID = '" ++ pid ++ "'"
+            hPutStrLn stderr $ "  Querying with: " ++ query_string
+
+            doIt query_string
+
 
     whenCmd "query" $ do
         query_string <- getOpt "<query_string>"

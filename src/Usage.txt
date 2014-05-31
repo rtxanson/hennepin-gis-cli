@@ -1,6 +1,7 @@
 Usage: 
   scrapegis fetch city [--csv] [--out=<outfile>]
   scrapegis fetch zip <zip_code> [--csv] [--out=<outfile>]
+  scrapegis fetch pid <pid> [--csv] [--out=<outfile>]
   scrapegis query <query_string> [--mock] [--csv] [--out=<outfile>] 
 
 Options:

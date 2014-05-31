@@ -50,54 +50,52 @@ data FeatureAttributes = FeatureAttributes {
     , getTaxTot :: Integer
     , getForfeitLandInd :: T.Text
     , getBuildYear :: T.Text
-    , getMunicCode :: !Text
-    , getMunicName :: !Text
-    -- , getAbstr_torrens_cd :: !Text
-    -- , getTorrens_typ :: !Text
-    -- , getCondo_no :: !Text
-    -- , getContig_ind1 :: !Text
-    -- , getCo_op_ind :: !Text
-    -- , getMunic_cd :: !Text
-    -- , getMunic_nm :: !Text
-    -- , getNet_tax_capacity :: !Text
-    -- , getEst_bldg_mkt_val1 :: !Text
-    -- , getEst_bldg_mkt_val2 :: !Text
-    -- , getEst_bldg_mkt_val3 :: !Text
-    -- , getEst_bldg_mkt_val4 :: !Text
-    -- , getEst_land_mkt_val1 :: !Text
-    -- , getEst_land_mkt_val2 :: !Text
-    -- , getEst_land_mkt_val3 :: !Text
-    -- , getEst_land_mkt_val4 :: !Text
-    -- , getFeaturecode :: !Text
-    -- , getFrac_house_no :: !Text
-    -- , getMailing_munic_cd :: !Text
-    -- , getMailing_munic_nm :: !Text
-    -- , getMetes_bnds1 :: !Text
-    -- , getMetes_bnds2 :: !Text
-    -- , getMetes_bnds3 :: !Text
-    -- , getMetes_bnds4 :: !Text
-    -- , getMore_metes_bnds_ind :: !Text
-    -- , getMulti_addr_ind :: !Text
-    -- , getObjectid :: !Text
-    -- , getParcel_area :: !Text
-    -- , getPid_text :: !Text
-    -- , getProperty_status_cd :: !Text
-    -- , getProperty_type_cd1 :: !Text
-    -- , getProperty_type_cd1_name :: !Text
-    -- , getProperty_type_cd2 :: !Text
-    -- , getProperty_type_cd3 :: !Text
-    -- , getProperty_type_cd4 :: !Text
-    -- , getSale_code :: !Text
-    -- , getSale_code_name :: !Text
-    -- , getSale_date :: !Text
-    -- , getSale_price :: !Text
-    -- , getSchool_dist_no :: !Text
-    -- , getSewer_dist_no :: !Text
-    -- , getState_cd :: !Text
-    -- , getShapeArea :: !Text
-    -- , getShapeLen :: !Text
-    -- , getTif_project_no :: !Text
-    -- , getWatershed_no :: !Text
+    , getMunicCode :: T.Text
+    , getMunicName :: T.Text
+    , getAbstrTorrensCode :: T.Text
+    , getTorrensType :: T.Text
+    , getCondoNumber :: T.Text
+    , getContigInd1 :: T.Text
+    , getCoopInd :: T.Text
+    , getNetTaxCapacity :: Integer
+    , getEstBldgMktVal1 :: Integer
+    , getEstBldgMktVal2 :: Integer
+    , getEstBldgMktVal3 :: Integer
+    , getEstBldgMktVal4 :: Integer
+    , getEstLandMktVal1 :: Integer
+    , getEstLandMktVal2 :: Integer
+    , getEstLandMktVal3 :: Integer
+    , getEstLandMktVal4 :: Integer
+    , getFeatureCode :: Integer
+    , getFracHouseNumber :: T.Text
+    , getMailingMunicCode :: T.Text
+    , getMailingMunicName :: T.Text
+    , getMetesBnds1 :: T.Text
+    , getMetesBnds2 :: T.Text
+    , getMetesBnds3 :: T.Text
+    , getMetesBnds4 :: T.Text
+    , getMoreMetesBndsInd :: T.Text
+    , getMultiAddrInd :: T.Text
+    , getObjectId :: Integer
+    -- TODO: what type is this actually? , getParcelArea :: T.Text
+    , getPidText :: T.Text
+    , getPropertyStatusCd :: T.Text
+    , getPropertyTypeCd1 :: T.Text
+    , getPropertyTypeCd1Name :: T.Text
+    , getPropertyTypeCd2 :: T.Text
+    , getPropertyTypeCd3 :: T.Text
+    , getPropertyTypeCd4 :: T.Text
+    , getSaleCode :: T.Text
+    , getSaleCodeName :: T.Text
+    , getSaleDate :: T.Text
+    , getSalePrice :: Integer
+    , getSchoolDistNo :: T.Text
+    , getSewerDistNo :: T.Text
+    , getStateCd :: Integer
+    -- TODO: expecting this needs another type - , getShapeArea :: T.Text
+    -- TODO: expecting this needs another type - , getShapeLen :: T.Text
+    , getTifProjectNumber :: T.Text
+    , getWatershedNumber :: T.Text
     } deriving (Show)
 
 -- | Control parsing the JSON into a Haskell data type.
@@ -125,50 +123,50 @@ instance FromJSON FeatureAttributes where
                       <*> (o .: "BUILD_YR")
                       <*> (o .: "MUNIC_CD")
                       <*> clean "MUNIC_NM"
-                      -- <*> (o .: "ABSTR_TORRENS_CD")
-                      -- <*> (o .: "TORRENS_TYP")
-                      -- <*> (o .: "CONDO_NO")
-                      -- <*> (o .: "CONTIG_IND1")
-                      -- <*> (o .: "CO_OP_IND")
-                      -- <*> (o .: "NET_TAX_CAPACITY")
-                      -- <*> (o .: "EST_BLDG_MKT_VAL1")
-                      -- <*> (o .: "EST_BLDG_MKT_VAL2")
-                      -- <*> (o .: "EST_BLDG_MKT_VAL3")
-                      -- <*> (o .: "EST_BLDG_MKT_VAL4")
-                      -- <*> (o .: "EST_LAND_MKT_VAL1")
-                      -- <*> (o .: "EST_LAND_MKT_VAL2")
-                      -- <*> (o .: "EST_LAND_MKT_VAL3")
-                      -- <*> (o .: "EST_LAND_MKT_VAL4")
-                      -- <*> (o .: "FEATURECODE")
-                      -- <*> (o .: "FRAC_HOUSE_NO")
-                      -- <*> (o .: "MAILING_MUNIC_CD")
-                      -- <*> (o .: "MAILING_MUNIC_NM")
-                      -- <*> (o .: "METES_BNDS1")
-                      -- <*> (o .: "METES_BNDS2")
-                      -- <*> (o .: "METES_BNDS3")
-                      -- <*> (o .: "METES_BNDS4")
-                      -- <*> (o .: "MORE_METES_BNDS_IND")
-                      -- <*> (o .: "MULTI_ADDR_IND")
-                      -- <*> (o .: "OBJECTID")
-                      -- <*> (o .: "PARCEL_AREA")
-                      -- <*> (o .: "PID_TEXT")
-                      -- <*> (o .: "PROPERTY_STATUS_CD")
-                      -- <*> (o .: "PROPERTY_TYPE_CD1")
-                      -- <*> (o .: "PROPERTY_TYPE_CD1_NAME")
-                      -- <*> (o .: "PROPERTY_TYPE_CD2")
-                      -- <*> (o .: "PROPERTY_TYPE_CD3")
-                      -- <*> (o .: "PROPERTY_TYPE_CD4")
-                      -- <*> (o .: "SALE_CODE")
-                      -- <*> (o .: "SALE_CODE_NAME")
-                      -- <*> (o .: "SALE_DATE")
-                      -- <*> (o .: "SALE_PRICE")
-                      -- <*> (o .: "SCHOOL_DIST_NO")
-                      -- <*> (o .: "SEWER_DIST_NO")
-                      -- <*> (o .: "STATE_CD")
+                      <*> clean "ABSTR_TORRENS_CD"
+                      <*> clean "TORRENS_TYP"
+                      <*> clean "CONDO_NO"
+                      <*> clean "CONTIG_IND1"
+                      <*> clean "CO_OP_IND"
+                      <*> (o .: "NET_TAX_CAPACITY")
+                      <*> (o .: "EST_BLDG_MKT_VAL1")
+                      <*> (o .: "EST_BLDG_MKT_VAL2")
+                      <*> (o .: "EST_BLDG_MKT_VAL3")
+                      <*> (o .: "EST_BLDG_MKT_VAL4")
+                      <*> (o .: "EST_LAND_MKT_VAL1")
+                      <*> (o .: "EST_LAND_MKT_VAL2")
+                      <*> (o .: "EST_LAND_MKT_VAL3")
+                      <*> (o .: "EST_LAND_MKT_VAL4")
+                      <*> (o .: "FEATURECODE")
+                      <*> clean "FRAC_HOUSE_NO"
+                      <*> clean "MAILING_MUNIC_CD"
+                      <*> clean "MAILING_MUNIC_NM"
+                      <*> clean "METES_BNDS1"
+                      <*> clean "METES_BNDS2"
+                      <*> clean "METES_BNDS3"
+                      <*> clean "METES_BNDS4"
+                      <*> clean "MORE_METES_BNDS_IND"
+                      <*> clean "MULTI_ADDR_IND"
+                      <*> (o .: "OBJECTID")
+                      -- <*> clean "PARCEL_AREA"
+                      <*> clean "PID_TEXT"
+                      <*> clean "PROPERTY_STATUS_CD"
+                      <*> clean "PROPERTY_TYPE_CD1"
+                      <*> clean "PROPERTY_TYPE_CD1_NAME"
+                      <*> clean "PROPERTY_TYPE_CD2"
+                      <*> clean "PROPERTY_TYPE_CD3"
+                      <*> clean "PROPERTY_TYPE_CD4"
+                      <*> clean "SALE_CODE"
+                      <*> clean "SALE_CODE_NAME"
+                      <*> (o .: "SALE_DATE")
+                      <*> (o .: "SALE_PRICE")
+                      <*> clean "SCHOOL_DIST_NO"
+                      <*> clean "SEWER_DIST_NO"
+                      <*> (o .: "STATE_CD")
                       -- <*> (o .: "Shape.area")
                       -- <*> (o .: "Shape.len")
-                      -- <*> (o .: "TIF_PROJECT_NO")
-                      -- <*> (o .: "WATERSHED_NO")
+                      <*> clean "TIF_PROJECT_NO"
+                      <*> (o .: "WATERSHED_NO")
     where
       -- needs special handling because there's tons of crap whitespace
       clean x = T.strip <$> o .: x
@@ -289,6 +287,50 @@ instance ToRecord Feature where
                         , getBuildYear
                         , getMunicCode
                         , getMunicName
+                        , getAbstrTorrensCode
+                        , getTorrensType
+                        , getCondoNumber
+                        , getContigInd1
+                        , getCoopInd
+                        , (T.pack . show . getNetTaxCapacity)
+                        , (T.pack . show . getEstBldgMktVal1)
+                        , (T.pack . show . getEstBldgMktVal2)
+                        , (T.pack . show . getEstBldgMktVal3)
+                        , (T.pack . show . getEstBldgMktVal4)
+                        , (T.pack . show . getEstLandMktVal1)
+                        , (T.pack . show . getEstLandMktVal2)
+                        , (T.pack . show . getEstLandMktVal3)
+                        , (T.pack . show . getEstLandMktVal4)
+                        , (T.pack . show . getFeatureCode)
+                        , getFracHouseNumber
+                        , getMailingMunicCode
+                        , getMailingMunicName
+                        , getMetesBnds1
+                        , getMetesBnds2
+                        , getMetesBnds3
+                        , getMetesBnds4
+                        , getMoreMetesBndsInd
+                        , getMultiAddrInd
+                        , (T.pack . show . getObjectId)
+                        -- , getParcelArea
+                        , getPidText
+                        , getPropertyStatusCd
+                        , getPropertyTypeCd1
+                        , getPropertyTypeCd1Name
+                        , getPropertyTypeCd2
+                        , getPropertyTypeCd3
+                        , getPropertyTypeCd4
+                        , getSaleCode
+                        , getSaleCodeName
+                        , getSaleDate
+                        , (T.pack . show . getSalePrice)
+                        , getSchoolDistNo
+                        , getSewerDistNo
+                        , (T.pack . show . getStateCd)
+                        -- , getShapeArea :: !Text
+                        -- , getShapeLen :: !Text
+                        , getTifProjectNumber
+                        , getWatershedNumber
                         ]
 
       row_fields = fmap toField $ [f attrs | f <- field_accessors]
