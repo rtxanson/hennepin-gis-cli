@@ -1,3 +1,9 @@
+Scrapegis. Used for fetching property records from Hennepin County's GIS
+server.
+
+    $ scrapegis fetch pid 3302924110099
+    3302924110099,2320,"COLFAX AVE S",55405,"M ... 
+
 Usage: 
   scrapegis fetch city [--csv] [--out=<outfile>]
   scrapegis fetch zip <zip_code> [--csv] [--out=<outfile>]
