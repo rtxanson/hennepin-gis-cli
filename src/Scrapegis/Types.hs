@@ -14,7 +14,7 @@ module Scrapegis.Types
 
 import Data.Text as T
 import Data.List as L
-import Data.Map as M
+-- import Data.Map as M
 
 import Data.Aeson
 import Control.Applicative
@@ -209,9 +209,9 @@ justFeatures Nothing = []
 
 data FeatureLookup = FeatureLookup { getFeatures :: [Feature]
                                    , displayFieldName :: String
-                                   , fieldAliases :: M.Map String String
-                                   , spatialReference :: M.Map String Integer
-                                   , geometryType :: String
+                                   -- , getFieldAliases :: M.Map String String
+                                   -- , getSpatialReference :: M.Map String Integer
+                                   -- , getGeometryType :: String
                                    } deriving (Show)
 
 -- | FeatureLookup JSON parsing.
@@ -219,9 +219,9 @@ data FeatureLookup = FeatureLookup { getFeatures :: [Feature]
 instance FromJSON FeatureLookup where
   parseJSON (Object o) = FeatureLookup <$> o .: "features"
                                        <*> o .: "displayFieldName"
-                                       <*> o .: "fieldAliases"
-                                       <*> o .: "spatialReference"
-                                       <*> o .: "geometryType"
+                                       -- <*> o .: "fieldAliases"
+                                       -- <*> o .: "spatialReference"
+                                       -- <*> o .: "geometryType"
   parseJSON  _ = mzero
 
 
