@@ -41,6 +41,8 @@ deps:
 init_sandbox:
 	cabal sandbox init --sandbox sandbox
 
+sandbox: init_sandbox
+
 all:
 	cabal configure
 	cabal build

@@ -1,12 +1,12 @@
 Usage: 
   scrapegis fetch city [--csv] [--out=<outfile>]
-  scrapegis fetch zip <zip_code> [--out=<outfile>]
+  scrapegis fetch zip <zip_code> [--csv] [--out=<outfile>]
   scrapegis query <query_string> [--mock] [--csv] [--out=<outfile>] 
 
 Options:
   -m, --mock         Use mocked data
   -c, --csv          Output to CSV
-  --no-header        DO not include CSV header in output.
+  --no-header        Do not include CSV header in output.
 
   --out=<outfile>    Output to file (stdout if not present)
 
