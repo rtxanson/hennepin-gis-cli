@@ -380,3 +380,75 @@ instance ToRecord Feature where
       row_fields = fmap toField $ [f attrs | f <- field_accessors]
       attrs = featureAttributes feat
 
+instance ToJSON Feature where
+  toJSON feature = obj
+    where
+        feat = featureAttributes feature
+        obj = object [ "PID" .=                    getObjectPID feat
+                     , "HOUSE_NO" .=               (T.pack . show . getHouseNumber)      feat
+                     , "STREET_NM" .=              getStreetName       feat
+                     , "ZIP_CD" .=                 getZipCode    feat
+                     , "OWNER_NM" .=               getOwnerName      feat
+                     , "TAXPAYER_NM" .=            getTaxpayerName         feat
+                     , "TAXPAYER_NM_1" .=          getTaxpayerName1           feat
+                     , "TAXPAYER_NM_2" .=          getTaxpayerName2           feat
+                     , "TAXPAYER_NM_3" .=          getTaxpayerName3           feat
+                     , "ABBREV_ADDN_NM" .=         getAbbrevAddnName            feat
+                     , "BLOCK" .=                  getBlock   feat
+                     , "LOT" .=                    getLot feat
+                     , "HMSTD_CD1" .=              getHmstdCode1       feat
+                     , "HMSTD_CD1_NAME" .=         getHmstdCode1Name            feat
+                     , "ADDITION_NO" .=            getAdditionNo         feat
+                     , "MKT_VAL_TOT" .=            (T.pack . show . getMktValTot)         feat
+                     , "TAX_TOT" .=                (T.pack . show . getTaxTot)     feat
+                     , "FORFEIT_LAND_IND" .=       getForfeitLandInd              feat
+                     , "BUILD_YR" .=               getBuildYear      feat
+                     , "MUNIC_CD" .=               getMunicCode      feat
+                     , "MUNIC_NM" .=               getMunicName      feat
+                     , "ABSTR_TORRENS_CD" .=       getAbstrTorrensCode              feat
+                     , "TORRENS_TYP" .=            getTorrensType         feat
+                     , "CONDO_NO" .=               getCondoNumber      feat
+                     , "CONTIG_IND1" .=            getContigInd1         feat
+                     , "CO_OP_IND" .=              getCoopInd       feat
+                     , "NET_TAX_CAPACITY" .=       (T.pack . show . getNetTaxCapacity)              feat
+                     , "EST_BLDG_MKT_VAL1" .=      (T.pack . show . getEstBldgMktVal1)               feat
+                     , "EST_BLDG_MKT_VAL2" .=      (T.pack . show . getEstBldgMktVal2)               feat
+                     , "EST_BLDG_MKT_VAL3" .=      (T.pack . show . getEstBldgMktVal3)               feat
+                     , "EST_BLDG_MKT_VAL4" .=      (T.pack . show . getEstBldgMktVal4)               feat
+                     , "EST_LAND_MKT_VAL1" .=      (T.pack . show . getEstLandMktVal1)               feat
+                     , "EST_LAND_MKT_VAL2" .=      (T.pack . show . getEstLandMktVal2)               feat
+                     , "EST_LAND_MKT_VAL3" .=      (T.pack . show . getEstLandMktVal3)               feat
+                     , "EST_LAND_MKT_VAL4" .=      (T.pack . show . getEstLandMktVal4)               feat
+                     , "FEATURECODE" .=            (T.pack . show . getFeatureCode)         feat
+                     , "FRAC_HOUSE_NO" .=          getFracHouseNumber           feat
+                     , "MAILING_MUNIC_CD" .=       getMailingMunicCode              feat
+                     , "MAILING_MUNIC_NM" .=       getMailingMunicName              feat
+                     , "METES_BNDS1" .=            getMetesBnds1         feat
+                     , "METES_BNDS2" .=            getMetesBnds2         feat
+                     , "METES_BNDS3" .=            getMetesBnds3         feat
+                     , "METES_BNDS4" .=            getMetesBnds4         feat
+                     , "MORE_METES_BNDS_IND" .=    getMoreMetesBndsInd                 feat
+                     , "MULTI_ADDR_IND" .=         getMultiAddrInd            feat
+                     , "OBJECTID" .=               (T.pack . show . getObjectId)      feat
+                     -- , "PARCEL_AREA" .=         -- , getParcelArea            feat
+                     , "PID_TEXT" .=               getPidText      feat
+                     , "PROPERTY_STATUS_CD" .=     getPropertyStatusCd                feat
+                     , "PROPERTY_TYPE_CD1" .=      getPropertyTypeCd1               feat
+                     , "PROPERTY_TYPE_CD1_NAME" .= getPropertyTypeCd1Name                    feat
+                     , "PROPERTY_TYPE_CD2" .=      getPropertyTypeCd2               feat
+                     , "PROPERTY_TYPE_CD3" .=      getPropertyTypeCd3               feat
+                     , "PROPERTY_TYPE_CD4" .=      getPropertyTypeCd4               feat
+                     , "SALE_CODE" .=              getSaleCode       feat
+                     , "SALE_CODE_NAME" .=         getSaleCodeName            feat
+                     , "SALE_DATE" .=              getSaleDate       feat
+                     , "SALE_PRICE" .=             (T.pack . show . getSalePrice)        feat
+                     , "SCHOOL_DIST_NO" .=         getSchoolDistNo            feat
+                     , "SEWER_DIST_NO" .=          getSewerDistNo           feat
+                     , "STATE_CD" .=               (T.pack . show . getStateCd)      feat
+                     -- , "Shape.area" .=          -- , getShapeArea :: !Text           feat
+                     -- , "Shape.len" .=           -- , getShapeLen :: !Text          feat
+                     , "TIF_PROJECT_NO" .=         getTifProjectNumber            feat
+                     , "WATERSHED_NO" .=           getWatershedNumber          feat
+                     ]
+  
+  

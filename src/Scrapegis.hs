@@ -37,6 +37,8 @@ import Data.Csv ( toRecord
                 -- , Header
                 )
 
+import qualified Data.Aeson as AESON
+
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as D8
 
@@ -129,7 +131,9 @@ run opts = do
 
       post_processing = if whenOpt "csv"
                             then featuresToCSV
-                            else featuresToCSV
+                            else if whenOpt "json"
+                            	 then featuresToJSON
+                            	 else featuresToCSV
 
       output_header = if whenOpt "no-header"
                             then False
@@ -144,11 +148,11 @@ run opts = do
           let header_str = D8.pack $ L.intercalate ("," :: String) feature_header_cols
           if output_file == "stdout"
               then do
-                  when output_header $ do D8.putStrLn header_str
+                  when (output_header && whenOpt "csv") $ do D8.putStrLn header_str
                   D8.putStrLn recs
               else do
                   h <- openFile output_file WriteMode
-                  when output_header $ do D8.hPut h header_str
+                  when (output_header && whenOpt "csv") $ do D8.hPut h header_str
                   D8.hPut h recs
                   hClose h
                   hPutStrLn stderr $ "Written to: " ++ output_file
@@ -177,4 +181,7 @@ run opts = do
 
 featuresToCSV :: [Feature] -> B.ByteString
 featuresToCSV recs = encode $ L.map toRecord recs
+
+featuresToJSON :: [Feature] -> B.ByteString
+featuresToJSON recs = AESON.encode recs
 
