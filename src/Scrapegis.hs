@@ -63,6 +63,24 @@ run :: Arguments -> IO ()
 run opts = do
 
     whenCmd "fetch" $ do
+        whenCmd "owner" $ do
+            name_like <- getOpt "<name_like>"
+            let query_string = "OWNER_NM LIKE '" ++ name_like ++ "'"
+            hPutStrLn stderr $ "  Querying with: " ++ query_string
+            doIt query_string
+
+        whenCmd "taxpayer" $ do
+            name_like <- getOpt "<name_like>"
+            let query_string = "OWNER_NM LIKE '" ++ name_like ++ "'"
+            hPutStrLn stderr $ "  Querying with: " ++ query_string
+            doIt query_string
+
+        whenCmd "names" $ do
+            name_like <- getOpt "<name_like>"
+            let query_string = "TAXPAYER_NM LIKE '" ++ name_like ++ "' OR " ++
+                               "OWNER_NM LIKE '" ++ name_like ++ "'"
+            hPutStrLn stderr $ "  Querying with: " ++ query_string
+            doIt query_string
 
         whenCmd "city" $ do
             -- EDINA: 24
