@@ -11,13 +11,13 @@ server.
     ...
 
 Usage: 
-  scrapegis fetch city [--csv] [--out=<outfile>]
-  scrapegis fetch zip <zip_code> [--csv] [--out=<outfile>]
-  scrapegis fetch taxpayer <name_like> [--csv] [--out=<outfile>]
-  scrapegis fetch owner <name_like> [--csv] [--out=<outfile>]
-  scrapegis fetch names <name_like> [--csv] [--out=<outfile>]
-  scrapegis fetch pid <pid> [--csv] [--out=<outfile>]
-  scrapegis query <query_string> [--mock] [--csv] [--out=<outfile>] 
+  scrapegis fetch city [options]
+  scrapegis fetch zip <zip_code> [options]
+  scrapegis fetch taxpayer <name_like> [options]
+  scrapegis fetch owner <name_like> [options]
+  scrapegis fetch names <name_like> [options]
+  scrapegis fetch pid <pid> [options]
+  scrapegis query <query_string> [options]
 
 Options:
   -m, --mock         Use mocked data

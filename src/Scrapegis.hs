@@ -131,17 +131,24 @@ run opts = do
                             then featuresToCSV
                             else featuresToCSV
 
+      output_header = if whenOpt "no-header"
+                            then False
+                            else True
+
       output_file = getArgWithDefault opts "stdout" (longOption "out")
 
       -- configured process
       doIt q = do
           records <- doQuery q
           let recs = cleanResult records
+          let header_str = D8.pack $ L.intercalate ("," :: String) feature_header_cols
           if output_file == "stdout"
               then do
+                  when output_header $ do D8.putStrLn header_str
                   D8.putStrLn recs
               else do
                   h <- openFile output_file WriteMode
+                  when output_header $ do D8.hPut h header_str
                   D8.hPut h recs
                   hClose h
                   hPutStrLn stderr $ "Written to: " ++ output_file
