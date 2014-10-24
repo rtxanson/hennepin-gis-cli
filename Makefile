@@ -39,7 +39,7 @@ deps:
 # cabal build && cabal test
 
 init_sandbox:
-	cabal sandbox init --sandbox sandbox
+	cabal sandbox init
 
 sandbox: init_sandbox
 
@@ -54,7 +54,7 @@ global-install:
 
 clean_sandbox:
 	cabal sandbox delete
-	rm -rf sandbox/
+	rm -rf .cabal-sandbox
 
 clean: clean_sandbox
 	rm -rf dist
