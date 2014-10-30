@@ -5,4 +5,4 @@ module Scrapegis.Settings
     ) where
 
 hennepin_gis_host :: String
-hennepin_gis_host = "http://gis.hennepin.mn/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"
+hennepin_gis_host = "http://gis.hennepin.us/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"

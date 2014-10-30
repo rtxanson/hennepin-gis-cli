@@ -61,4 +61,3 @@ Otherwise inspect the Makefile for commands.
 
 Cabal dependencies take a while to install because there are lots (welcome to
 Haskell), but once that's done, the actual package builds fast.
-
