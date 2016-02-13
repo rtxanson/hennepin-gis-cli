@@ -47,15 +47,15 @@ Executable scrapegis
 
 -- TODO: docopt isn't yet in cabal, how to include this in build depends?
 
-Test-Suite spec
+Test-Suite scrapegis-test
   Type:                 exitcode-stdio-1.0
-  Default-Language:     Haskell2010
-  Hs-Source-Dirs:       src
-                      , test
-  Ghc-Options:          -Wall
+  Hs-Source-Dirs:       test
   Main-Is:              Spec.hs
   Build-Depends:        base
+                      , scrapegis
                       , hspec
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  Default-Language:     Haskell2010
 
 Source-Repository head
   Type:                 git

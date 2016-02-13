@@ -8,6 +8,14 @@ import Scrapegis.Types
 import Scrapegis.Utils
 import Scrapegis.Settings
 
+-- logging output 
+-- import System.IO ( stderr
+--                  , hPutStrLn
+--                  , hClose
+--                  , openFile
+--                  , IOMode(WriteMode)
+--                  )
+
 import Network.Wreq
 
 import Control.Applicative
@@ -17,6 +25,7 @@ import Data.Text as T
 import Data.List as L
 
 import qualified Data.ByteString.Lazy as B
+-- import qualified Data.ByteString.Lazy.Char8 as D8
 
 import Data.Aeson
 
@@ -31,6 +40,11 @@ import System.IO (stderr, hPutStrLn)
 
 getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
 getHenCountyRecords query_string = do
+    -- logging output 
+    -- resp <- idReq query_string
+    -- h <- openFile "id_request.json" WriteMode
+    -- D8.hPut h (resp ^. responseBody)
+    -- hClose h
     m <- decodeIDResponseToJSON <$> idReq query_string
     let chunks = chunkArray 900 (getIDs m)
     bbq <- fetchChunks chunks
@@ -88,5 +102,9 @@ fetchChunks (first:rest) = do
 
     m <- getRecordByIds first -- :: Response B.ByteString
     let rs = decodeRecResponseToJSON m
+    -- logging output 
+    -- h <- openFile "chunk_response.json" WriteMode
+    -- D8.hPut h (m ^. responseBody)
+    -- hClose h
     mbs <- fetchChunks rest
     return $ rs : mbs

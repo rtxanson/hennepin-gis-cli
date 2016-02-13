@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, QuasiQuotes #-}
 
 module Scrapegis 
     ( run
@@ -12,44 +12,37 @@ import System.IO ( stderr
                  )
 
 import Scrapegis.Hennepin as Henn
-import Scrapegis.MockHennepin as Mock
+-- import Scrapegis.MockHennepin as Mock
 import Scrapegis.Types
+import Scrapegis.Export
 
 -- Option parsing
 import Control.Monad (when)
 
-import System.Console.Docopt ( getArg
-                             , getArgWithDefault
-                             , isPresent
-                             , command
-                             , argument
-                             , longOption
-                             , Arguments
-                             )
+import System.Console.Docopt 
+import System.Environment (getArgs)
 
-import Data.Text as T
-import Data.List as L
 -- import Data.Vector (fromList)
 
-import Data.Csv ( toRecord
-                , encode
-                -- , encodeByName
-                -- , Header
-                )
-
-import qualified Data.Aeson as AESON
-
-import qualified Data.ByteString.Lazy as B
+-- import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as D8
+import Data.Text as T
+import Data.List as L
 
--- TODO: Main.hs: FailedConnectionException2 "gis.co.hennepin.mn.us" 80 False
--- getAddrInfo: does not exist (nodename nor servname provided, or not known)
+
+makeQueryString :: String -> String -> String
+makeQueryString "zip"      aarg = "ZIP_CD = '" ++ aarg ++ "'"
+makeQueryString "owner"    aarg = "OWNER_NM LIKE '" ++ aarg ++ "'"
+makeQueryString "taxpayer" aarg = "TAXPAYER_NM LIKE '" ++ aarg ++ "'"
+makeQueryString "names"    aarg = "TAXPAYER_NM LIKE '" ++ aarg ++ "' OR " ++
+                                  "OWNER_NM LIKE '" ++ aarg ++ "'"
+makeQueryString "city"     _ = "MUNIC_CD = '01'" -- (minneapolis)
+makeQueryString "pid"      aarg = "PID = '" ++ aarg ++ "'"
+makeQueryString _ _ = ""
+
 -- TODO: with optional object KML field
-
 -- TODO: option to specify chunk size. default, 900? 
 -- TODO: output as stuff becomes available-- don't need to store in mem.
-
-
 -- TODO: output geojson polygons to kml snippets: https://hackage.haskell.org/package/geojson
 -- http://hackage.haskell.org/package/gps-0.2.4/docs/Data-GPS.html
 -- http://hackage.haskell.org/package/proj4-hs-bindings
@@ -61,127 +54,95 @@ import qualified Data.ByteString.Lazy.Char8 as D8
 
 -- http://hackage.haskell.org/package/esqueleto-1.4.1.2/docs/Database-Esqueleto.html
 
-run :: Arguments -> IO ()
-run opts = do
+patterns :: Docopt
+patterns = [docoptFile|src/Usage.txt|]
+
+run :: IO ()
+run =  do
+    opts <- parseArgsOrExit patterns =<< getArgs
+    handleOpts opts
+
+-- configured process
+runQuery :: FilePath -> [Char] -> IO ()
+runQuery output_file q = do
+     hPutStrLn stderr $ "  Querying with: " ++ q
+     records <- Henn.getHenCountyRecords (T.pack q)
+     let recs = featuresToCSV $ concatenateFeatures records
+     let header_str = D8.pack $ L.intercalate ("," :: String) feature_header_cols
+     if output_file == "stdout"
+         then do
+             D8.putStrLn header_str
+             D8.putStrLn recs
+         else do
+             h <- openFile output_file WriteMode
+             D8.hPut h header_str
+             D8.hPut h recs
+             hClose h
+             hPutStrLn stderr $ "Written to: " ++ output_file
+
+handleOpts :: Arguments -> IO ()
+handleOpts opts = do
+
+    whenCmd "query" $ do
+        let query_string = getOpt "query_string"
+        go query_string
 
     whenCmd "fetch" $ do
+        whenCmd "zip" $ do
+            let query_arg = getOpt "query_arg"
+            let query_string = makeQueryString "zip" query_arg
+            go query_string
+
         whenCmd "owner" $ do
-            name_like <- getOpt "<name_like>"
-            let query_string = "OWNER_NM LIKE '" ++ name_like ++ "'"
-            hPutStrLn stderr $ "  Querying with: " ++ query_string
-            doIt query_string
+            let query_arg = getOpt "query_arg"
+            let query_string = makeQueryString "owner" query_arg
+            go query_string
 
         whenCmd "taxpayer" $ do
-            name_like <- getOpt "<name_like>"
-            let query_string = "OWNER_NM LIKE '" ++ name_like ++ "'"
-            hPutStrLn stderr $ "  Querying with: " ++ query_string
-            doIt query_string
+            let query_arg = getOpt "query_arg"
+            let query_string = makeQueryString "taxpayer" query_arg
+            go query_string
 
         whenCmd "names" $ do
-            name_like <- getOpt "<name_like>"
-            let query_string = "TAXPAYER_NM LIKE '" ++ name_like ++ "' OR " ++
-                               "OWNER_NM LIKE '" ++ name_like ++ "'"
-            hPutStrLn stderr $ "  Querying with: " ++ query_string
-            doIt query_string
+            let query_arg = getOpt "query_arg"
+            let query_string = makeQueryString "names" query_arg
+            go query_string
 
         whenCmd "city" $ do
             -- EDINA: 24
             -- ORONO: 38
             -- RICHFIELD: 42
-            let query_string = "MUNIC_CD = '01'" -- (minneapolis)
-            hPutStrLn stderr $ "  Querying with: " ++ query_string
-            hPutStrLn stderr $ "                 (minneapolis)"
+            let query_arg = getOpt "query_arg"
+            let query_string = makeQueryString "city" query_arg
 
-            doIt query_string
-
-        whenCmd "zip" $ do
-            zip_cd <- getOpt "<zip_code>"
-            let query_string = "ZIP_CD = '" ++ zip_cd ++ "'"
-            hPutStrLn stderr $ "  Querying with: " ++ query_string
-
-            doIt query_string
+            go query_string
 
         whenCmd "pid" $ do
-            pid <- getOpt "<pid>"
-            let query_string = "PID = '" ++ pid ++ "'"
-            hPutStrLn stderr $ "  Querying with: " ++ query_string
+            let query_arg = getOpt "query_arg"
+            let query_string = makeQueryString "pid" query_arg
 
-            doIt query_string
+            go query_string
 
-
-    whenCmd "query" $ do
-        query_string <- getOpt "<query_string>"
-
-        doIt query_string
+    hPutStrLn stderr $ "Done."
 
   where
-      -- Processing funcs
-      doQuery q = dataSource (T.pack q)
-      cleanResult r = post_processing $ concatenateFeatures r
+      output_file = getArgWithDefault opts "stdout" (longOption "out")
+      go q = runQuery output_file q
 
       -- Some docopt shortcuts
       whenCmd x = when $ opts `isPresent` (command x)
-      whenOpt x =        opts `isPresent` (longOption x)
-      getOpt  x =        opts `getArg` (argument x)
+      getOpt  x =        L.concat $ opts `getAllArgs` (argument x)
 
       -- Options
-      dataSource = if whenOpt "mock"
-                             then Mock.getHenCountyRecords
-                             else Henn.getHenCountyRecords
+      -- whenOpt x =        opts `isPresent` (longOption x)
+      -- dataSource = if whenOpt "mock"
+      --                        then Mock.getHenCountyRecords
+      --                        else 
+      -- post_processing = featuresToCSV
+      -- post_processing = if whenOpt "csv"
+      --                       then featuresToCSV
+      --                       else if whenOpt "json"
+      --                       	 then featuresToJSON
+      --                       	 else featuresToCSV
 
-      post_processing = if whenOpt "csv"
-                            then featuresToCSV
-                            else if whenOpt "json"
-                            	 then featuresToJSON
-                            	 else featuresToCSV
-
-      output_header = if whenOpt "no-header"
-                            then False
-                            else True
-
-      output_file = getArgWithDefault opts "stdout" (longOption "out")
-
-      -- configured process
-      doIt q = do
-          records <- doQuery q
-          let recs = cleanResult records
-          let header_str = D8.pack $ L.intercalate ("," :: String) feature_header_cols
-          if output_file == "stdout"
-              then do
-                  when (output_header && whenOpt "csv") $ do D8.putStrLn header_str
-                  D8.putStrLn recs
-              else do
-                  h <- openFile output_file WriteMode
-                  when (output_header && whenOpt "csv") $ do D8.hPut h header_str
-                  D8.hPut h recs
-                  hClose h
-                  hPutStrLn stderr $ "Written to: " ++ output_file
-
-          hPutStrLn stderr $ "Done."
-
--- should shift these functions to Utils
-
--- import Data.Vector (fromList)
-
--- queryToCSV :: Maybe FeatureLookup -> B.ByteString
--- queryToCSV (Just recs) = encode $ L.map toRecord (getFeatures recs)
--- queryToCSV Nothing = "" :: B.ByteString
-
--- TODO: header
-
--- queryToCSVWithHeader :: Maybe FeatureLookup -> B.ByteString
--- queryToCSVWithHeader (Just features) = encodeByName header records
---     where
---         -- This is what this is, but need: Header
---         header :: Data.Vector.Vector String
---         header = (fromList feature_header_cols)
--- 
---         records = L.map toRecord features
--- queryToCSVWithHeader Nothing = "" :: B.ByteString
-
-featuresToCSV :: [Feature] -> B.ByteString
-featuresToCSV recs = encode $ L.map toRecord recs
-
-featuresToJSON :: [Feature] -> B.ByteString
-featuresToJSON recs = AESON.encode recs
 
