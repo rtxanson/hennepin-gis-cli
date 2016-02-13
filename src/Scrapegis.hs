@@ -6,11 +6,9 @@ module Scrapegis
 
 import System.IO ( stderr
                  , hPutStrLn
-                 , hClose
-                 , openFile
-                 , IOMode(WriteMode)
                  )
 
+import Scrapegis.Query
 import Scrapegis.Hennepin as Henn
 -- import Scrapegis.MockHennepin as Mock
 import Scrapegis.Types
@@ -22,23 +20,7 @@ import Control.Monad (when)
 import System.Console.Docopt 
 import System.Environment (getArgs)
 
--- import Data.Vector (fromList)
-
--- import qualified Data.ByteString.Lazy as B
-import qualified Data.ByteString.Lazy.Char8 as D8
-import Data.Text as T
 import Data.List as L
-
-
-makeQueryString :: String -> String -> String
-makeQueryString "zip"      aarg = "ZIP_CD = '" ++ aarg ++ "'"
-makeQueryString "owner"    aarg = "OWNER_NM LIKE '" ++ aarg ++ "'"
-makeQueryString "taxpayer" aarg = "TAXPAYER_NM LIKE '" ++ aarg ++ "'"
-makeQueryString "names"    aarg = "TAXPAYER_NM LIKE '" ++ aarg ++ "' OR " ++
-                                  "OWNER_NM LIKE '" ++ aarg ++ "'"
-makeQueryString "city"     _ = "MUNIC_CD = '01'" -- (minneapolis)
-makeQueryString "pid"      aarg = "PID = '" ++ aarg ++ "'"
-makeQueryString _ _ = ""
 
 -- TODO: with optional object KML field
 -- TODO: option to specify chunk size. default, 900? 
@@ -61,24 +43,6 @@ run :: IO ()
 run =  do
     opts <- parseArgsOrExit patterns =<< getArgs
     handleOpts opts
-
--- configured process
-runQuery :: FilePath -> [Char] -> IO ()
-runQuery output_file q = do
-     hPutStrLn stderr $ "  Querying with: " ++ q
-     records <- Henn.getHenCountyRecords (T.pack q)
-     let recs = featuresToCSV $ concatenateFeatures records
-     let header_str = D8.pack $ L.intercalate ("," :: String) feature_header_cols
-     if output_file == "stdout"
-         then do
-             D8.putStrLn header_str
-             D8.putStrLn recs
-         else do
-             h <- openFile output_file WriteMode
-             D8.hPut h header_str
-             D8.hPut h recs
-             hClose h
-             hPutStrLn stderr $ "Written to: " ++ output_file
 
 handleOpts :: Arguments -> IO ()
 handleOpts opts = do
@@ -144,5 +108,3 @@ handleOpts opts = do
       --                       else if whenOpt "json"
       --                       	 then featuresToJSON
       --                       	 else featuresToCSV
-
-
