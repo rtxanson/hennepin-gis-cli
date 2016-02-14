@@ -26,6 +26,9 @@ Library
                      , vector
 
   Exposed-modules:     Scrapegis
+                     , Scrapegis.Query
+                     , Scrapegis.Export
+                     , Scrapegis.Types
   Default-Language:     Haskell2010
 
 Executable scrapegis
@@ -49,11 +52,20 @@ Executable scrapegis
 
 Test-Suite scrapegis-test
   Type:                 exitcode-stdio-1.0
-  Hs-Source-Dirs:       test
+  Hs-Source-Dirs:       test, src
   Main-Is:              Spec.hs
   Build-Depends:        base
                       , scrapegis
                       , hspec
+                      , lens 
+                      , aeson
+                      , wreq
+                      , docopt
+                      , cassava
+                      , bytestring
+                      , containers
+                      , text
+                      , vector
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   Default-Language:     Haskell2010
 

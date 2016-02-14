@@ -23,7 +23,6 @@ Options:
   -m, --mock         Use mocked data
   -c, --csv          Output to CSV
   -j, --json         Output to simpler JSON
-  --no-header        Do not include CSV header in output.
 
   --out=<outfile>    Output to file (stdout if not present)
 

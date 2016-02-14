@@ -2,13 +2,12 @@
 
 module Scrapegis.Types
     ( IDQueryResult
-    , Feature
+    , Feature(..)
+    , FeatureLookup(..)
+    , FeatureAttributes(..)
     , justFeatures
-    , FeatureLookup
     , concatenateFeatures
     , getIDList
-    , getFeatures
-    , featureAttributes
     , feature_header_cols
     ) where
 
@@ -22,8 +21,6 @@ import Data.Csv (toRecord, toField, ToRecord, record)
 
 import Control.Monad (mzero)
 
--- TODO: aim for this ordering
---
 -- "PID","HOUSE_NO","STREET_NM","PROCESSED_ADDR","ZIP_CD","OWNER_NM","TAXPAYER_NM","TAXPAYER_NM_1","TAXPAYER_NM_2","TAXPAYER_NM_3","ABBREV_ADDN_NM","BLOCK","LOT","HMSTD_CD1","HMSTD_CD1_NAME","ADDITION_NO","MKT_VAL_TOT","TAX_TOT","FORFEIT_LAND_IND","BUILD_YR","ABSTR_TORRENS_CD","TORRENS_TYP","CONDO_NO","CONTIG_IND1","CO_OP_IND","MUNIC_CD","MUNIC_NM","NET_TAX_CAPACITY","EST_BLDG_MKT_VAL1","EST_BLDG_MKT_VAL2","EST_BLDG_MKT_VAL3","EST_BLDG_MKT_VAL4","EST_LAND_MKT_VAL1","EST_LAND_MKT_VAL2","EST_LAND_MKT_VAL3","EST_LAND_MKT_VAL4","FEATURECODE","FRAC_HOUSE_NO","MAILING_MUNIC_CD","MAILING_MUNIC_NM","METES_BNDS1","METES_BNDS2","METES_BNDS3","METES_BNDS4","MORE_METES_BNDS_IND","MULTI_ADDR_IND","OBJECTID","PARCEL_AREA","PID_TEXT","PROPERTY_STATUS_CD","PROPERTY_TYPE_CD1","PROPERTY_TYPE_CD1_NAME","PROPERTY_TYPE_CD2","PROPERTY_TYPE_CD3","PROPERTY_TYPE_CD4","SALE_CODE","SALE_CODE_NAME","SALE_DATE","SALE_PRICE","SCHOOL_DIST_NO","SEWER_DIST_NO","STATE_CD","Shape.area","Shape.len","TIF_PROJECT_NO","WATERSHED_NO"
 
 -- | Each JSON result contains a list of `Feature` objects, which contains both
