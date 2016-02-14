@@ -30,6 +30,7 @@ textToFeatureLookup text = decode text :: Maybe FeatureLookup
 spec :: Spec
 spec = do
   describe "Scrapegis.Types" $ do
+
     it "can parse ID Query Result JSON" $ do
       h <- openFile "test_data/object_ids.json" ReadMode
       instr <- B.hGetContents h
@@ -47,4 +48,15 @@ spec = do
       (getZipCode attrs) `shouldBe` "55414"
       hClose h
 
+  describe "Scrapegis.Export" $ do
+
+    it "can turn Feature Lookup JSON to CSV" $ do
+
+      h <- openFile "test_data/test_chunk.json" ReadMode
+      instr <- B.hGetContents h
+      let (Just json) = textToFeatureLookup instr
+      let feats = take 2 $ getFeatures json
+      let csv = featuresToCSV feats
+
+      hClose h
 
