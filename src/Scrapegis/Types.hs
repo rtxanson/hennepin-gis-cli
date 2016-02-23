@@ -12,9 +12,7 @@ module Scrapegis.Types
     , feature_header_cols
     ) where
 
--- import Data.Text as T
 import Data.List as L
--- import Data.Map as M
 
 import Data.Aeson
 import Data.Aeson.Types
@@ -33,7 +31,6 @@ data RunParams = RunParams {
   , queryString :: String
   } deriving (Show)
 
-
 -- | Each JSON result contains a list of `Feature` objects, which contains both
 -- | attributes and geographical information. FeatureAttributes handles only
 -- | the attribute section.
@@ -51,46 +48,44 @@ data FeatureAttributes = FeatureAttributes {
     , getABBREV_ADDN_NM :: String
     , getBLOCK :: String
     , getLOT :: String
-    -- , getHMSTD_CD1 :: String
-    -- , getHMSTD_CD1_NM :: String
-    -- , getADDITION_NO :: String
-    -- , getMKT_VAL_TOT :: Integer
-    -- , getTAX_TOT :: Integer
-    -- , getFORFEIT_LAND_IND :: String
-    -- , getBUILD_YR :: String
-    -- , getMUNIC_CD :: String
-    -- , getMUNIC_NM :: String
+    , getHMSTD_CD1 :: String
+    , getHMSTD_CD1_NAME :: String
 
+    , getADDITION_NO :: String
+    , getMKT_VAL_TOT :: Integer
+    , getTAX_TOT :: Integer
+    , getFORFEIT_LAND_IND :: String
+    , getBUILD_YR :: String
+    , getMUNIC_CD :: String
+    , getMUNIC_NM :: String
 
-    -- TODO: rename
-    -- , getAbstrTorrensCode :: String
-    -- , getTorrensType :: String
-    -- , getCondoNumber :: String
-    -- , getContigInd1 :: String
-    -- , getCoopInd :: String
-    -- , getNetTaxCapacity :: Integer
-    -- , getEstBldgMktVal1 :: Integer
-    -- , getEstBldgMktVal2 :: Integer
-    -- , getEstBldgMktVal3 :: Integer
-    -- , getEstBldgMktVal4 :: Integer
-    -- , getEstLandMktVal1 :: Integer
-    -- , getEstLandMktVal2 :: Integer
-    -- , getEstLandMktVal3 :: Integer
-    -- , getEstLandMktVal4 :: Integer
-    -- , getFeatureCode :: Integer
-    -- , getFracHouseNumber :: String
-    -- , getMailingMunicCode :: String
-    -- , getMailingMunicName :: String
-    -- , getMetesBnds1 :: String
-    -- , getMetesBnds2 :: String
-    -- , getMetesBnds3 :: String
-    -- , getMetesBnds4 :: String
-    -- , getMoreMetesBndsInd :: String
-    -- , getMultiAddrInd :: String
-    -- , getObjectId :: Integer
-    -- TODO: what type is this actually? , getParcelArea :: String
+    , getABSTR_TORRENS_CD    :: String
+    , getTORRENS_TYP         :: String
+    , getCONDO_NO            :: String
+    , getCONTIG_IND1         :: String
+    , getCO_OP_IND           :: String
+    , getNET_TAX_CAPACITY    :: Integer
+    , getEST_BLDG_MKT_VAL1   :: Integer
+    , getEST_BLDG_MKT_VAL2   :: Integer
+    , getEST_BLDG_MKT_VAL3   :: Integer
+    , getEST_BLDG_MKT_VAL4   :: Integer
+    , getEST_LAND_MKT_VAL1   :: Integer
+    , getEST_LAND_MKT_VAL2   :: Integer
+    , getEST_LAND_MKT_VAL3   :: Integer
+    , getEST_LAND_MKT_VAL4   :: Integer
+    , getFEATURECODE         :: Integer
+    , getFRAC_HOUSE_NO       :: String
+    , getMAILING_MUNIC_CD    :: String
+    , getMAILING_MUNIC_NM    :: String
+    , getMETES_BNDS1         :: String
+    , getMETES_BNDS2         :: String
+    , getMETES_BNDS3         :: String
+    , getMETES_BNDS4         :: String
+    , getMORE_METES_BNDS_IND :: String
+    , getMULTI_ADDR_IND      :: String
+    , getOBJECTID            :: Integer
 
-    -- TODO: rename
+    -- TODO: rename from csv header values
     -- , getPidText :: String
     -- , getPropertyStatusCd :: String
     -- , getPropertyTypeCd1 :: String
@@ -105,10 +100,6 @@ data FeatureAttributes = FeatureAttributes {
     -- , getSchoolDistNo :: String
     -- , getSewerDistNo :: String
     -- , getStateCd :: Integer
-    -- TODO: expecting this needs another type - , getShapeArea :: String
-    -- TODO: expecting this needs another type - , getShapeLen :: String
-
-    -- TODO: rename
     -- , getTifProjectNumber :: String
     -- , getWatershedNumber :: String
     } deriving (Generic, Show)
@@ -119,83 +110,8 @@ instance ToJSON FeatureAttributes where
   toEncoding = genericToEncoding defaultOptions { fieldLabelModifier = (L.drop 3) }
   toJSON     = genericToJSON defaultOptions { fieldLabelModifier = (L.drop 3) }
 
-
 instance FromJSON FeatureAttributes where
   parseJSON = genericParseJSON defaultOptions { fieldLabelModifier = (L.drop 3) }
-
-  -- TODO: keep this around as notes on postprocessing
-
-  -- parseJSON (Object o) = 
-  --   FeatureAttributes <$> (o .: "PID")
-  --                     <*> (o .: "HOUSE_NO")
-  --                     <*> clean "STREET_NM"
-  --                     <*> (o .: "ZIP_CD")
-  --                     <*> clean "OWNER_NM"
-  --                     <*> clean "TAXPAYER_NM"
-  --                     <*> clean "TAXPAYER_NM_1"
-  --                     <*> clean "TAXPAYER_NM_2"
-  --                     <*> clean "TAXPAYER_NM_3"
-  --                     <*> clean "ABBREV_ADDN_NM"
-  --                     <*> clean "BLOCK"
-  --                     <*> clean "LOT"
-  --                     <*> (o .: "HMSTD_CD1")
-  --                     <*> clean "HMSTD_CD1_NAME"
-  --                     <*> clean "ADDITION_NO"
-  --                     <*> (o .: "MKT_VAL_TOT")
-  --                     <*> (o .: "TAX_TOT")
-  --                     <*> clean "FORFEIT_LAND_IND"
-  --                     <*> (o .: "BUILD_YR")
-  --                     <*> (o .: "MUNIC_CD")
-  --                     <*> clean "MUNIC_NM"
-  --                     <*> clean "ABSTR_TORRENS_CD"
-  --                     <*> clean "TORRENS_TYP"
-  --                     <*> clean "CONDO_NO"
-  --                     <*> clean "CONTIG_IND1"
-  --                     <*> clean "CO_OP_IND"
-  --                     <*> (o .: "NET_TAX_CAPACITY")
-  --                     <*> (o .: "EST_BLDG_MKT_VAL1")
-  --                     <*> (o .: "EST_BLDG_MKT_VAL2")
-  --                     <*> (o .: "EST_BLDG_MKT_VAL3")
-  --                     <*> (o .: "EST_BLDG_MKT_VAL4")
-  --                     <*> (o .: "EST_LAND_MKT_VAL1")
-  --                     <*> (o .: "EST_LAND_MKT_VAL2")
-  --                     <*> (o .: "EST_LAND_MKT_VAL3")
-  --                     <*> (o .: "EST_LAND_MKT_VAL4")
-  --                     <*> (o .: "FEATURECODE")
-  --                     <*> clean "FRAC_HOUSE_NO"
-  --                     <*> clean "MAILING_MUNIC_CD"
-  --                     <*> clean "MAILING_MUNIC_NM"
-  --                     <*> clean "METES_BNDS1"
-  --                     <*> clean "METES_BNDS2"
-  --                     <*> clean "METES_BNDS3"
-  --                     <*> clean "METES_BNDS4"
-  --                     <*> clean "MORE_METES_BNDS_IND"
-  --                     <*> clean "MULTI_ADDR_IND"
-  --                     <*> (o .: "OBJECTID")
-  --                     -- <*> clean "PARCEL_AREA"
-  --                     <*> clean "PID_TEXT"
-  --                     <*> clean "PROPERTY_STATUS_CD"
-  --                     <*> clean "PROPERTY_TYPE_CD1"
-  --                     <*> clean "PROPERTY_TYPE_CD1_NAME"
-  --                     <*> clean "PROPERTY_TYPE_CD2"
-  --                     <*> clean "PROPERTY_TYPE_CD3"
-  --                     <*> clean "PROPERTY_TYPE_CD4"
-  --                     <*> clean "SALE_CODE"
-  --                     <*> clean "SALE_CODE_NAME"
-  --                     <*> (o .: "SALE_DATE")
-  --                     <*> (o .: "SALE_PRICE")
-  --                     <*> clean "SCHOOL_DIST_NO"
-  --                     <*> clean "SEWER_DIST_NO"
-  --                     <*> (o .: "STATE_CD")
-  --                     -- <*> (o .: "Shape.area")
-  --                     -- <*> (o .: "Shape.len")
-  --                     <*> clean "TIF_PROJECT_NO"
-  --                     <*> (o .: "WATERSHED_NO")
-  --   where
-  --     -- needs special handling because there's tons of crap whitespace
-  --     clean x = T.strip <$> o .: x
-
-  -- parseJSON  _ = mzero
 
 -- | This handles the JSON returned by the first object ID query. It returns no
 -- | data apart from the object IDs, which are later chunked and processed
@@ -263,48 +179,50 @@ feature_header_cols = [ "PID"
                       , "HOUSE_NO"
                       , "STREET_NM"
                       , "ZIP_CD"
-                      -- , "OWNER_NM"
-                      -- , "TAXPAYER_NM"
-                      -- , "TAXPAYER_NM_1"
-                      -- , "TAXPAYER_NM_2"
-                      -- , "TAXPAYER_NM_3"
-                      -- , "ABBREV_ADDN_NM"
-                      -- , "BLOCK"
-                      -- , "LOT"
-                      -- , "HMSTD_CD1"
-                      -- , "HMSTD_CD1_NAME"
-                      -- , "ADDITION_NO"
-                      -- , "MKT_VAL_TOT"
-                      -- , "TAX_TOT"
-                      -- , "FORFEIT_LAND_IND"
-                      -- , "BUILD_YR"
-                      -- , "MUNIC_CD"
-                      -- , "MUNIC_NM"
-                      -- , "ABSTR_TORRENS_CD"
-                      -- , "TORRENS_TYP"
-                      -- , "CONDO_NO"
-                      -- , "CONTIG_IND1"
-                      -- , "CO_OP_IND"
-                      -- , "NET_TAX_CAPACITY"
-                      -- , "EST_BLDG_MKT_VAL1"
-                      -- , "EST_BLDG_MKT_VAL2"
-                      -- , "EST_BLDG_MKT_VAL3"
-                      -- , "EST_BLDG_MKT_VAL4"
-                      -- , "EST_LAND_MKT_VAL1"
-                      -- , "EST_LAND_MKT_VAL2"
-                      -- , "EST_LAND_MKT_VAL3"
-                      -- , "EST_LAND_MKT_VAL4"
-                      -- , "FEATURECODE"
-                      -- , "FRAC_HOUSE_NO"
-                      -- , "MAILING_MUNIC_CD"
-                      -- , "MAILING_MUNIC_NM"
-                      -- , "METES_BNDS1"
-                      -- , "METES_BNDS2"
-                      -- , "METES_BNDS3"
-                      -- , "METES_BNDS4"
-                      -- , "MORE_METES_BNDS_IND"
-                      -- , "MULTI_ADDR_IND"
-                      -- , "OBJECTID"
+                      , "OWNER_NM"
+                      , "TAXPAYER_NM"
+                      , "TAXPAYER_NM_1"
+                      , "TAXPAYER_NM_2"
+                      , "TAXPAYER_NM_3"
+                      , "ABBREV_ADDN_NM"
+                      , "BLOCK"
+                      , "LOT"
+                      , "HMSTD_CD1"
+                      , "HMSTD_CD1_NAME"
+                      , "ADDITION_NO"
+                      , "MKT_VAL_TOT"
+                      , "TAX_TOT"
+                      , "FORFEIT_LAND_IND"
+                      , "BUILD_YR"
+                      , "MUNIC_CD"
+                      , "MUNIC_NM"
+                      , "ABSTR_TORRENS_CD"
+                      , "TORRENS_TYP"
+                      , "CONDO_NO"
+                      , "CONTIG_IND1"
+                      , "CO_OP_IND"
+                      , "NET_TAX_CAPACITY"
+                      , "EST_BLDG_MKT_VAL1"
+                      , "EST_BLDG_MKT_VAL2"
+                      , "EST_BLDG_MKT_VAL3"
+                      , "EST_BLDG_MKT_VAL4"
+                      , "EST_LAND_MKT_VAL1"
+                      , "EST_LAND_MKT_VAL2"
+                      , "EST_LAND_MKT_VAL3"
+                      , "EST_LAND_MKT_VAL4"
+                      , "FEATURECODE"
+                      , "FRAC_HOUSE_NO"
+                      , "MAILING_MUNIC_CD"
+                      , "MAILING_MUNIC_NM"
+                      , "METES_BNDS1"
+                      , "METES_BNDS2"
+                      , "METES_BNDS3"
+                      , "METES_BNDS4"
+                      , "MORE_METES_BNDS_IND"
+                      , "MULTI_ADDR_IND"
+                      , "OBJECTID"
+
+                      -- TODO: more data
                       -- -- <*> clean "PARCEL_AREA"
                       -- , "PID_TEXT"
                       -- , "PROPERTY_STATUS_CD"
@@ -329,11 +247,6 @@ feature_header_cols = [ "PID"
 instance ToRecord Feature where
   toRecord feat = record row_fields
     where
-      -- TODO:
-      --   there's more data cleaning to be done, probably want to combine
-      --   taxpayer names, and address and such
-
-      -- new fields go here
       field_accessors = [ getPID
                         , (show . getHOUSE_NO )
                         , getSTREET_NM
@@ -346,62 +259,43 @@ instance ToRecord Feature where
                         , getABBREV_ADDN_NM
                         , getBLOCK
                         , getLOT
-                        -- , getHMSTD_CD1
-                        -- , getHMSTD_CD1_NM
-                        -- , getADDITION_NO
-                        -- , (show . getMKT_VAL_TOT)
-                        -- , (show . getTAX_TOT)
-                        -- , getFORFEIT_LAND_IND
-                        -- , getBUILD_YR
-                        -- , getMUNIC_CD
-                        -- , getMUNIC_NM
+                        , getHMSTD_CD1
+                        , getHMSTD_CD1_NAME
 
-                        -- , (T.pack . show . getMktValTot)
-                        -- , (T.pack . show . getTaxTot)
-                        --   TODO: , getAbstrTorrensCode
-                        --   TODO: , getTorrensType
-                        --   TODO: , getCondoNumber
-                        --   TODO: , getContigInd1
-                        --   TODO: , getCoopInd
-                        --   TODO: , (T.pack . show . getNetTaxCapacity)
-                        --   TODO: , (T.pack . show . getEstBldgMktVal1)
-                        --   TODO: , (T.pack . show . getEstBldgMktVal2)
-                        --   TODO: , (T.pack . show . getEstBldgMktVal3)
-                        --   TODO: , (T.pack . show . getEstBldgMktVal4)
-                        --   TODO: , (T.pack . show . getEstLandMktVal1)
-                        --   TODO: , (T.pack . show . getEstLandMktVal2)
-                        --   TODO: , (T.pack . show . getEstLandMktVal3)
-                        --   TODO: , (T.pack . show . getEstLandMktVal4)
-                        --   TODO: , (T.pack . show . getFeatureCode)
-                        --   TODO: , getFracHouseNumber
-                        --   TODO: , getMailingMunicCode
-                        --   TODO: , getMailingMunicName
-                        --   TODO: , getMetesBnds1
-                        --   TODO: , getMetesBnds2
-                        --   TODO: , getMetesBnds3
-                        --   TODO: , getMetesBnds4
-                        --   TODO: , getMoreMetesBndsInd
-                        --   TODO: , getMultiAddrInd
-                        --   TODO: , (T.pack . show . getObjectId)
-                        --   TODO: -- , getParcelArea
-                        --   TODO: , getPidText
-                        --   TODO: , getPropertyStatusCd
-                        --   TODO: , getPropertyTypeCd1
-                        --   TODO: , getPropertyTypeCd1Name
-                        --   TODO: , getPropertyTypeCd2
-                        --   TODO: , getPropertyTypeCd3
-                        --   TODO: , getPropertyTypeCd4
-                        --   TODO: , getSaleCode
-                        --   TODO: , getSaleCodeName
-                        --   TODO: , getSaleDate
-                        --   TODO: , (T.pack . show . getSalePrice)
-                        --   TODO: , getSchoolDistNo
-                        --   TODO: , getSewerDistNo
-                        --   TODO: , (T.pack . show . getStateCd)
-                        --   TODO: -- , getShapeArea :: !Text
-                        --   TODO: -- , getShapeLen :: !Text
-                        --   TODO: , getTifProjectNumber
-                        --   TODO: , getWatershedNumber
+                        , getADDITION_NO
+                        , (show . getMKT_VAL_TOT)
+                        , (show . getTAX_TOT)
+                        , getFORFEIT_LAND_IND
+                        , getBUILD_YR
+                        , getMUNIC_CD
+                        , getMUNIC_NM
+
+                        , getABSTR_TORRENS_CD
+                        , getTORRENS_TYP
+                        , getCONDO_NO
+                        , getCONTIG_IND1
+                        , getCO_OP_IND
+                        , (show . getNET_TAX_CAPACITY)
+                        , (show . getEST_BLDG_MKT_VAL1)
+                        , (show . getEST_BLDG_MKT_VAL2)
+                        , (show . getEST_BLDG_MKT_VAL3)
+                        , (show . getEST_BLDG_MKT_VAL4)
+                        , (show . getEST_LAND_MKT_VAL1)
+                        , (show . getEST_LAND_MKT_VAL2)
+                        , (show . getEST_LAND_MKT_VAL3)
+                        , (show . getEST_LAND_MKT_VAL4)
+                        , (show . getFEATURECODE)
+                        , getFRAC_HOUSE_NO
+                        , getMAILING_MUNIC_CD
+                        , getMAILING_MUNIC_NM
+                        , getMETES_BNDS1
+                        , getMETES_BNDS2
+                        , getMETES_BNDS3
+                        , getMETES_BNDS4
+                        , getMORE_METES_BNDS_IND
+                        , getMULTI_ADDR_IND
+                        , (show . get)
+
                         ]
 
       row_fields = fmap toField $ [f attrs | f <- field_accessors]
