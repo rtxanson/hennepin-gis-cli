@@ -27,6 +27,9 @@ textToQueryResult text = decode text :: Maybe IDQueryResult
 textToFeatureLookup :: B.ByteString -> Maybe FeatureLookup
 textToFeatureLookup text = decode text :: Maybe FeatureLookup
 
+textToAttributes :: B.ByteString -> Maybe FeatureAttributes
+textToAttributes text = decode text :: Maybe FeatureAttributes
+
 spec :: Spec
 spec = do
   describe "Scrapegis.Types" $ do
@@ -36,16 +39,26 @@ spec = do
       instr <- B.hGetContents h
       let (Just json) = textToQueryResult instr
       let first = getIDList json !! 0
-      first `shouldBe` 25218
+      first `shouldBe` 461446
       hClose h
 
+    it "can parse Feature Lookup Attribute JSON" $ do
+      h <- openFile "test_data/test_attributes.json" ReadMode
+      instr <- B.hGetContents h
+      let (Just json) = textToAttributes instr
+      putStrLn $ getZIP_CD json
+      (getZIP_CD json) `shouldBe` "55401"
+      hClose h
+
+
     it "can parse Feature Lookup JSON" $ do
-      h <- openFile "test_data/test_chunk.json" ReadMode
+      h <- openFile "test_data/two_json.json" ReadMode
       instr <- B.hGetContents h
       let (Just json) = textToFeatureLookup instr
       let feats = getFeatures json
       let attrs = featureAttributes $ feats !! 0
-      (getZipCode attrs) `shouldBe` "55414"
+      putStrLn $ getZIP_CD attrs
+      (getZIP_CD attrs) `shouldBe` "55401"
       hClose h
 
   describe "Scrapegis.Export" $ do

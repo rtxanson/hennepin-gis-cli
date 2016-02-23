@@ -9,10 +9,8 @@ import System.IO ( stderr
                  )
 
 import Scrapegis.Query
-import Scrapegis.Hennepin as Henn
--- import Scrapegis.MockHennepin as Mock
-import Scrapegis.Types
-import Scrapegis.Export
+-- import Scrapegis.Types
+-- import Scrapegis.Export
 
 -- Option parsing
 import Control.Monad (when)
