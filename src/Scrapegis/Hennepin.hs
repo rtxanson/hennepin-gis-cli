@@ -32,15 +32,9 @@ import System.IO (stderr, hPutStrLn)
 getHenCountyRecords :: Text -> IO [FeatureLookup]
 getHenCountyRecords query_string = do
     m <- decodeIDResponseToJSON <$> idReq query_string
-    let chunks = chunkArray 900 (getIDs m)
-    bbq <- fetchChunks chunks
-    let lookups = parseLookups bbq
-    return $ lookups
+    bbq <- fetchInChunks m
+    return $ parseLookups bbq
   where
-    getIDs :: Maybe IDQueryResult -> [Integer]
-    getIDs (Just array) = getIDList array
-    getIDs Nothing = []
-
     parseLookups :: [Response B.ByteString] -> [FeatureLookup]
     parseLookups ls = catMaybes $ decodeRecResponseToJSON <$> ls
 
@@ -88,3 +82,18 @@ fetchChunks (first:rest) = do
       | remaining_count > 0 = "Requests remaining: " ++ (show remaining_count)
       | otherwise           = "Requesting..."
 
+fetchInChunks :: Maybe IDQueryResult -> IO [Response B.ByteString]
+fetchInChunks ids = do
+    let chunks = chunkArray 900 (getIDs ids)
+    bbq <- fetchChunks chunks
+    return $ bbq
+  where
+    getIDs :: Maybe IDQueryResult -> [Integer]
+    getIDs (Just array) = getIDList array
+    getIDs Nothing = []
+
+decodeIDResponseToJSON :: Response B.ByteString -> Maybe IDQueryResult
+decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
+
+decodeRecResponseToJSON :: Response B.ByteString -> Maybe FeatureLookup
+decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
