@@ -9,30 +9,13 @@ import System.IO ( stderr
                  )
 
 import Scrapegis.Query
--- import Scrapegis.Types
--- import Scrapegis.Export
 
--- Option parsing
 import Control.Monad (when)
 
 import System.Console.Docopt 
 import System.Environment (getArgs)
 
 import Data.List as L
-
--- TODO: with optional object KML field
--- TODO: option to specify chunk size. default, 900? 
--- TODO: output as stuff becomes available-- don't need to store in mem.
--- TODO: output geojson polygons to kml snippets: https://hackage.haskell.org/package/geojson
--- http://hackage.haskell.org/package/gps-0.2.4/docs/Data-GPS.html
--- http://hackage.haskell.org/package/proj4-hs-bindings
--- https://github.com/pavpen/proj4-hs-bindings
---
--- http://hackage.haskell.org/package/txt-sushi
--- http://hackage.haskell.org/package/csv-conduit
-
-
--- http://hackage.haskell.org/package/esqueleto-1.4.1.2/docs/Database-Esqueleto.html
 
 patterns :: Docopt
 patterns = [docoptFile|src/Usage.txt|]
@@ -91,18 +74,6 @@ handleOpts opts = do
       output_file = getArgWithDefault opts "stdout" (longOption "out")
       go q = runQuery output_file q
 
-      -- Some docopt shortcuts
       whenCmd x = when $ opts `isPresent` (command x)
       getOpt  x =        L.concat $ opts `getAllArgs` (argument x)
 
-      -- Options
-      -- whenOpt x =        opts `isPresent` (longOption x)
-      -- dataSource = if whenOpt "mock"
-      --                        then Mock.getHenCountyRecords
-      --                        else 
-      -- post_processing = featuresToCSV
-      -- post_processing = if whenOpt "csv"
-      --                       then featuresToCSV
-      --                       else if whenOpt "json"
-      --                       	 then featuresToJSON
-      --                       	 else featuresToCSV

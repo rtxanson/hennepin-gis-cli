@@ -17,6 +17,8 @@ import Data.List as L
 import Data.Aeson
 import Data.Aeson.Types
 
+import Data.String (IsString)
+
 import Control.Applicative
 import Data.Csv (toRecord, toField, ToRecord, record)
 
@@ -244,6 +246,8 @@ feature_header_cols = [ "PID"
                       -- , "WATERSHED_NO"
                       ]
 
+-- cleanText (String s) = String $ T.strip s
+
 instance ToRecord Feature where
   toRecord feat = record row_fields
     where
@@ -294,10 +298,9 @@ instance ToRecord Feature where
                         , getMETES_BNDS4
                         , getMORE_METES_BNDS_IND
                         , getMULTI_ADDR_IND
-                        , (show . get)
-
+                        , (show . getOBJECTID)
                         ]
 
-      row_fields = fmap toField $ [f attrs | f <- field_accessors]
+      row_fields = toField <$> [f attrs | f <- field_accessors]
       attrs = featureAttributes feat
 
