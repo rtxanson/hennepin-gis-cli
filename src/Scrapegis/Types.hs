@@ -4,18 +4,19 @@ module Scrapegis.Types
     ( IDQueryResult
     , Feature(..)
     , RunParams(..)
+    , OutputData(..)
     , FeatureLookup(..)
     , FeatureAttributes(..)
-    , justFeatures
-    , concatenateFeatures
     , getIDList
-    , feature_header_cols
+    , feature_header_bs
     ) where
 
 import Data.List as L
 
+import Data.Maybe (catMaybes)
 import Data.Aeson
 import Data.Aeson.Types
+import qualified Data.ByteString.Lazy.Char8 as D8
 
 import Data.String (IsString)
 
@@ -32,6 +33,11 @@ data RunParams = RunParams {
     outputFile :: FilePath
   , queryString :: String
   } deriving (Show)
+
+data OutputData = OutputData {
+    csvHeader  :: D8.ByteString
+  , csvRecords :: [Feature]
+}
 
 -- | Each JSON result contains a list of `Feature` objects, which contains both
 -- | attributes and geographical information. FeatureAttributes handles only
@@ -139,12 +145,6 @@ instance FromJSON Feature where
   parseJSON (Object o) = Feature <$> o .: "attributes"
   parseJSON  _ = mzero
 
--- | Return a list of features or nothing depending on the result of the query.
-
-justFeatures :: Maybe FeatureLookup -> [Feature]
-justFeatures (Just f) = getFeatures f
-justFeatures Nothing = []
-
 -- | This is the result of querying a set of IDs.
 
 data FeatureLookup = FeatureLookup { getFeatures :: [Feature]
@@ -172,9 +172,7 @@ instance ToRecord FeatureLookup where
     where
       fieldname = displayFieldName feat
 
-concatenateFeatures :: [Maybe FeatureLookup] -> [Feature]
-concatenateFeatures ms = fs
-    where fs = L.concat (L.map justFeatures ms)
+feature_header_bs = D8.pack $ L.intercalate ("," :: String) feature_header_cols
 
 feature_header_cols :: [String]
 feature_header_cols = [ "PID"

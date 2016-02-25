@@ -12,6 +12,7 @@ import System.IO ( stderr
 import qualified Data.ByteString.Lazy.Char8 as D8
 import Data.Text as T
 import Data.List as L
+import Control.Applicative
 
 import Scrapegis.Hennepin as Henn
 -- import Scrapegis.MockHennepin as Mock
@@ -28,21 +29,28 @@ makeQueryString "city"     _ = "MUNIC_CD = '01'" -- (minneapolis)
 makeQueryString "pid"      aarg = "PID = '" ++ aarg ++ "'"
 makeQueryString _ _ = ""
 
+printTheThing f o = do
+  f $ csvHeader o
+  f $ featuresToCSV $ csvRecords o
+
+handleOutput :: FilePath -> OutputData -> IO ()
+handleOutput "stdout" o = do
+  printTheThing (D8.putStrLn) o
+handleOutput output_file o = do
+  h <- openFile output_file WriteMode
+  printTheThing (D8.hPut h) o
+  hClose h
+  hPutStrLn stderr $ "Written to: " ++ output_file
+
 -- configured process
 runQuery :: FilePath -> [Char] -> IO ()
 runQuery output_file q = do
      hPutStrLn stderr $ "  Querying with: " ++ q
      records <- Henn.getHenCountyRecords (T.pack q)
-     let recs = featuresToCSV $ concatenateFeatures records
-     let header_str = D8.pack $ L.intercalate ("," :: String) feature_header_cols
-     if output_file == "stdout"
-         then do
-             D8.putStrLn header_str
-             D8.putStrLn recs
-         else do
-             h <- openFile output_file WriteMode
-             D8.hPut h header_str
-             D8.hPut h recs
-             hClose h
-             hPutStrLn stderr $ "Written to: " ++ output_file
+
+     handleOutput output_file $ OutputData {
+        csvHeader = feature_header_bs
+      , csvRecords = L.concat $ getFeatures <$> records
+     }
+
 

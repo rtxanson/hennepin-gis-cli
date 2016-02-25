@@ -7,6 +7,7 @@ module Scrapegis.Hennepin
 import Scrapegis.Types
 import Scrapegis.Utils
 import Scrapegis.Settings
+import Scrapegis.Export
 
 import Network.Wreq
 
@@ -14,6 +15,8 @@ import Control.Applicative
 import Control.Lens
 
 import Data.Aeson
+import Data.Maybe (catMaybes)
+
 import Data.Text as T
 import Data.List as L
 
@@ -26,24 +29,20 @@ import System.IO (stderr, hPutStrLn)
 -- | POSTs all the object IDs and returns actual objects. Requests falling under the 
 -- | second are chunked by 900, so larger requests may take some time.
 
-getHenCountyRecords :: Text -> IO [Maybe FeatureLookup]
+getHenCountyRecords :: Text -> IO [FeatureLookup]
 getHenCountyRecords query_string = do
     m <- decodeIDResponseToJSON <$> idReq query_string
     let chunks = chunkArray 900 (getIDs m)
     bbq <- fetchChunks chunks
-    return bbq
-
+    let lookups = parseLookups bbq
+    return $ lookups
   where
-
     getIDs :: Maybe IDQueryResult -> [Integer]
     getIDs (Just array) = getIDList array
     getIDs Nothing = []
 
-decodeIDResponseToJSON :: Response B.ByteString -> Maybe IDQueryResult
-decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
-
-decodeRecResponseToJSON :: Response B.ByteString -> Maybe FeatureLookup
-decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
+    parseLookups :: [Response B.ByteString] -> [FeatureLookup]
+    parseLookups ls = catMaybes $ decodeRecResponseToJSON <$> ls
 
 -- | Generates a response object for a list of object IDs.
 
@@ -76,14 +75,16 @@ idReq querystring = getWith opts hennepin_gis_host
 
 -- | For future learning: this could be easily replaced by mapM: `mapM getRecordByIDs chunks`.
 
-fetchChunks :: [[Integer]] -> IO [Maybe FeatureLookup]
+fetchChunks :: [[Integer]] -> IO [Response B.ByteString]
 fetchChunks [] = return []
 fetchChunks (first:rest) = do
-    let remaining_count = L.length rest
-    if remaining_count > 0 then hPutStrLn stderr $ "Requests remaining: " ++ (show $ L.length rest)
-    	                   else hPutStrLn stderr "Requesting..."
-
+    hPutStrLn stderr $ status_message
     m <- getRecordByIds first -- :: Response B.ByteString
-    let rs = decodeRecResponseToJSON m
     mbs <- fetchChunks rest
-    return $ rs : mbs
+    return $ m : mbs
+  where
+    remaining_count = L.length rest
+    status_message
+      | remaining_count > 0 = "Requests remaining: " ++ (show remaining_count)
+      | otherwise           = "Requesting..."
+
