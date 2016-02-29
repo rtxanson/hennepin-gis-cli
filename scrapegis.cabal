@@ -23,6 +23,7 @@ Library
                      , bytestring
                      , containers
                      , text
+                     , transformers
                      , vector
 
   Exposed-modules:     Scrapegis

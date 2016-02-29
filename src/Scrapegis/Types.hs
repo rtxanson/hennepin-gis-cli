@@ -5,6 +5,7 @@ module Scrapegis.Types
     , Feature(..)
     , RunParams(..)
     , OutputData(..)
+    , RequestBatch(..)
     , FeatureLookup(..)
     , FeatureAttributes(..)
     , getIDList
@@ -37,6 +38,12 @@ data RunParams = RunParams {
 data OutputData = OutputData {
     csvHeader  :: D8.ByteString
   , csvRecords :: [Feature]
+}
+
+data RequestBatch = RequestBatch {
+    batchNumber :: Int
+  , batchTotal :: Int
+  , batchValues :: [Integer]
 }
 
 -- | Each JSON result contains a list of `Feature` objects, which contains both

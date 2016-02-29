@@ -33,25 +33,11 @@ getHenCountyRecords :: Text -> IO [FeatureLookup]
 getHenCountyRecords query_string = do
     m <- decodeIDResponseToJSON <$> idReq query_string
     bbq <- fetchInChunks m
-    return $ parseLookups bbq
+    let lookups = parseLookups bbq
+    return $ lookups
   where
     parseLookups :: [Response B.ByteString] -> [FeatureLookup]
     parseLookups ls = catMaybes $ decodeRecResponseToJSON <$> ls
-
--- | Generates a response object for a list of object IDs.
-
-getRecordByIds :: [Integer] -> IO (Response B.ByteString)
-getRecordByIds ids = post hennepin_gis_host args
-  where
-    args = [ "objectIds" := (ids_as_string :: T.Text)
-           , "f" := ("json" :: T.Text)
-           , "outFields" := ("*" :: T.Text)
-           ] 
-
-    -- IDs need to be one string joined with comma
-    ids_as_string = T.intercalate comma id_strings
-    id_strings = T.pack <$> [show i | i <- ids]
-    comma = T.pack ", "
 
 -- | For a given querystring, this returns a Response containing matching
 -- | object IDs.
@@ -70,22 +56,41 @@ idReq querystring = getWith opts hennepin_gis_host
 -- | For future learning: this could be easily replaced by mapM: `mapM getRecordByIDs chunks`.
 
 fetchChunks :: [[Integer]] -> IO [Response B.ByteString]
-fetchChunks [] = return []
-fetchChunks (first:rest) = do
-    hPutStrLn stderr $ status_message
-    m <- getRecordByIds first -- :: Response B.ByteString
-    mbs <- fetchChunks rest
-    return $ m : mbs
+fetchChunks x = mapM getRecordByIds batches
   where
-    remaining_count = L.length rest
+    enumerated = L.zip [0..] x
+    batches = [RequestBatch { batchNumber = n, batchTotal = L.length x, batchValues = q } | (n, q) <- enumerated]
+
+-- | Generates a response object for a list of object IDs.
+
+getRecordByIds :: RequestBatch -> IO (Response B.ByteString)
+getRecordByIds batch = do
+    hPutStrLn stderr $ status_message
+    post hennepin_gis_host args
+  where
+    args = [ "objectIds" := (ids_as_string :: T.Text)
+           , "f" := ("json" :: T.Text)
+           , "outFields" := ("*" :: T.Text)
+           ] 
+
+    -- IDs need to be one string joined with comma
+    comma = T.pack ", "
+    ids = batchValues batch
+    ids_as_string = T.intercalate comma id_strings
+    id_strings = T.pack <$> [show i | i <- ids]
+
+    remaining_count = (batchTotal batch) - (batchNumber batch)
     status_message
       | remaining_count > 0 = "Requests remaining: " ++ (show remaining_count)
       | otherwise           = "Requesting..."
+
 
 fetchInChunks :: Maybe IDQueryResult -> IO [Response B.ByteString]
 fetchInChunks ids = do
     let chunks = chunkArray 900 (getIDs ids)
     bbq <- fetchChunks chunks
+    let lent = L.length bbq
+    hPutStrLn stderr $ "Requesting in " ++ show lent ++ " batches "
     return $ bbq
   where
     getIDs :: Maybe IDQueryResult -> [Integer]
