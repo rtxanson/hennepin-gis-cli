@@ -29,9 +29,11 @@ makeQueryString "city"     _ = "MUNIC_CD = '01'" -- (minneapolis)
 makeQueryString "pid"      aarg = "PID = '" ++ aarg ++ "'"
 makeQueryString _ _ = ""
 
-printTheThing f o = do
-  f $ csvHeader o
-  f $ featuresToCSV $ csvRecords o
+printTheThing :: Monad m => (D8.ByteString -> m b) -> OutputData -> m b
+printTheThing f o = do printHeader >> printRecords
+  where
+    printHeader  = f $ csvHeader o
+    printRecords = f $ featuresToCSV $ csvRecords o
 
 handleOutput :: FilePath -> OutputData -> IO ()
 handleOutput "stdout" o = do

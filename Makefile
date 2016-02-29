@@ -1,15 +1,10 @@
-﻿NUMBER_OF_CORES = $(sysctl -n hw.ncpu)
+# To build this project, make all.
+#
+
+NUMBER_OF_CORES = $(sysctl -n hw.ncpu)
 BUILD_FLAGS := "-j$(NUMBER_OF_CORES)"
 
-# desc "Run tests"
-# task :test do
-#   sh "cabal install #{build_flags} --only-dependencies --enable-tests"
-#   sh "cabal configure --enable-tests"
-#   sh "cabal build"
-#   sh "cabal test"
-# end
-
-build_sandbox: init_sandbox deps
+build_sandbox: init_sandbox
 	cabal install $(BUILD_FLAGS) --only-dependencies
 	cabal configure
 	cabal build
@@ -19,38 +14,10 @@ doc:
 	cabal haddock
 	open dist/doc/html/hi/index.html
 
-# release: init deps
-# 	set -o errexit
-# 	set -o nounset
-# 	cabal clean
-# 	cabal sdist
-# 	cd dist/
-# 	tar xvf hi-*.tar.gz
-# 	cd hi-*/
-# 	cabal install --only-dependencies --enable-tests
-# 	cabal configure --enable-tests --disable-optimization --disable-library-profiling
-# 	cabal build && cabal test
-
-deps:
-	cabal install --only-dependencies --enable-tests
-
-# cabal install --only-dependencies --enable-tests
-# cabal configure --enable-tests --disable-optimization --disable-library-profiling
-# cabal build && cabal test
-
 init_sandbox:
 	cabal sandbox init
 
 sandbox: init_sandbox
-
-all:
-	cabal configure
-	cabal build
-
-global-install:
-	cabal configure
-	cabal deps
-	cabal install --global
 
 clean_sandbox:
 	cabal sandbox delete
@@ -59,5 +26,17 @@ clean_sandbox:
 clean: clean_sandbox
 	rm -rf dist
 
-all_sandbox: build_sandbox
+## Targets that most people will care about
 
+test:
+	cabal install --only-dependencies --enable-tests
+	cabal test
+
+all: build_sandbox
+	cabal configure
+	cabal build
+
+global-install:
+	cabal configure
+	cabal deps
+	cabal install --global

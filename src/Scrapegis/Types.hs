@@ -14,12 +14,9 @@ module Scrapegis.Types
 
 import Data.List as L
 
-import Data.Maybe (catMaybes)
 import Data.Aeson
 import Data.Aeson.Types
 import qualified Data.ByteString.Lazy.Char8 as D8
-
-import Data.String (IsString)
 
 import Control.Applicative
 import Data.Csv (toRecord, toField, ToRecord, record)
@@ -179,6 +176,7 @@ instance ToRecord FeatureLookup where
     where
       fieldname = displayFieldName feat
 
+feature_header_bs :: D8.ByteString
 feature_header_bs = D8.pack $ L.intercalate ("," :: String) feature_header_cols
 
 feature_header_cols :: [String]

@@ -7,7 +7,6 @@ module Scrapegis.Hennepin
 import Scrapegis.Types
 import Scrapegis.Utils
 import Scrapegis.Settings
-import Scrapegis.Export
 
 import Network.Wreq
 
