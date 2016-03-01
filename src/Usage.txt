@@ -4,10 +4,7 @@ server.
     $ scrapegis fetch pid 3302924110099
     3302924110099,2320,"COLFAX AVE S",55405,"M ... 
 
-    $ scrapegis fetch names %BARRY%G%
-    ...
-
-    $ scrapegis fetch names "GARY S%"
+    $ scrapegis fetch names %BOB%SM%
     ...
 
 Usage: 

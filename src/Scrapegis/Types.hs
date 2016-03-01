@@ -13,6 +13,7 @@ module Scrapegis.Types
     ) where
 
 import Data.List as L
+import Data.Text as T
 
 import Data.Aeson
 import Data.Aeson.Types
@@ -177,7 +178,10 @@ instance ToRecord FeatureLookup where
       fieldname = displayFieldName feat
 
 feature_header_bs :: D8.ByteString
-feature_header_bs = D8.pack $ L.intercalate ("," :: String) feature_header_cols
+feature_header_bs = heddr
+  where
+    heddr = D8.pack $ (commad ++ "\n")
+    commad = L.intercalate ("," :: String) feature_header_cols
 
 feature_header_cols :: [String]
 feature_header_cols = [ "PID"
@@ -254,6 +258,7 @@ feature_header_cols = [ "PID"
 instance ToRecord Feature where
   toRecord feat = record row_fields
     where
+      clean = T.unpack . T.strip . T.pack
       field_accessors = [ getPID
                         , (show . getHOUSE_NO )
                         , getSTREET_NM
@@ -304,6 +309,6 @@ instance ToRecord Feature where
                         , (show . getOBJECTID)
                         ]
 
-      row_fields = toField <$> [f attrs | f <- field_accessors]
+      row_fields = toField <$> [clean (f attrs) | f <- field_accessors]
       attrs = featureAttributes feat
 

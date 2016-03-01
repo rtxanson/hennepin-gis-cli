@@ -88,8 +88,6 @@ fetchInChunks :: Maybe IDQueryResult -> IO [Response B.ByteString]
 fetchInChunks ids = do
     let chunks = chunkArray 900 (getIDs ids)
     bbq <- fetchChunks chunks
-    let lent = L.length bbq
-    hPutStrLn stderr $ "Requesting in " ++ show lent ++ " batches "
     return $ bbq
   where
     getIDs :: Maybe IDQueryResult -> [Integer]
