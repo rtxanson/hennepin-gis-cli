@@ -1,9 +1,8 @@
-﻿{-# LANGUAGE OverloadedStrings, DeriveGeneric  #-}
+﻿{-# LANGUAGE OverloadedStrings, DeriveGeneric, RecordWildCards  #-}
 
 module Scrapegis.Types
     ( IDQueryResult
     , Feature(..)
-    , RunParams(..)
     , OutputData(..)
     , RequestBatch(..)
     , FeatureLookup(..)
@@ -20,18 +19,12 @@ import Data.Aeson.Types
 import qualified Data.ByteString.Lazy.Char8 as D8
 
 import Control.Applicative
+import Data.Maybe
 import Data.Csv (toRecord, toField, ToRecord, record)
 
 import GHC.Generics
 
 import Control.Monad (mzero)
-
--- | Parameters for the main run.
-
-data RunParams = RunParams {
-    outputFile :: FilePath
-  , queryString :: String
-  } deriving (Show)
 
 data OutputData = OutputData {
     csvHeader  :: D8.ByteString
@@ -43,7 +36,6 @@ data RequestBatch = RequestBatch {
   , batchTotal :: Int
   , batchValues :: [Integer]
 }
-
 -- | Each JSON result contains a list of `Feature` objects, which contains both
 -- | attributes and geographical information. FeatureAttributes handles only
 -- | the attribute section.
@@ -97,6 +89,14 @@ data FeatureAttributes = FeatureAttributes {
     , getMORE_METES_BNDS_IND :: String
     , getMULTI_ADDR_IND      :: String
     , getOBJECTID            :: Integer
+
+    , getPID_TEXT  :: String
+    , getPROPERTY_STATUS_CD  :: String
+    , getPROPERTY_TYPE_CD1  :: String
+    , getPROPERTY_TYPE_CD1_NAME  :: String
+    , getPROPERTY_TYPE_CD2  :: String
+    , getPROPERTY_TYPE_CD3  :: String
+    , getPROPERTY_TYPE_CD4  :: String
 
     -- TODO: rename from csv header values
     -- , getPidText :: String
@@ -233,13 +233,13 @@ feature_header_cols = [ "PID"
 
                       -- TODO: more data
                       -- -- <*> clean "PARCEL_AREA"
-                      -- , "PID_TEXT"
-                      -- , "PROPERTY_STATUS_CD"
-                      -- , "PROPERTY_TYPE_CD1"
-                      -- , "PROPERTY_TYPE_CD1_NAME"
-                      -- , "PROPERTY_TYPE_CD2"
-                      -- , "PROPERTY_TYPE_CD3"
-                      -- , "PROPERTY_TYPE_CD4"
+                      , "PID_TEXT"
+                      , "PROPERTY_STATUS_CD"
+                      , "PROPERTY_TYPE_CD1"
+                      , "PROPERTY_TYPE_CD1_NAME"
+                      , "PROPERTY_TYPE_CD2"
+                      , "PROPERTY_TYPE_CD3"
+                      , "PROPERTY_TYPE_CD4"
                       -- , "SALE_CODE"
                       -- , "SALE_CODE_NAME"
                       -- , "SALE_DATE"
@@ -307,6 +307,13 @@ instance ToRecord Feature where
                         , getMORE_METES_BNDS_IND
                         , getMULTI_ADDR_IND
                         , (show . getOBJECTID)
+                        , getPID_TEXT
+                        , getPROPERTY_STATUS_CD
+                        , getPROPERTY_TYPE_CD1
+                        , getPROPERTY_TYPE_CD1_NAME
+                        , getPROPERTY_TYPE_CD2
+                        , getPROPERTY_TYPE_CD3
+                        , getPROPERTY_TYPE_CD4
                         ]
 
       row_fields = toField <$> [clean (f attrs) | f <- field_accessors]

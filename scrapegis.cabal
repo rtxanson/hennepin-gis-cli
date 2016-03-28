@@ -16,6 +16,7 @@ Library
   Hs-source-dirs:      src
   Build-depends:       base >= 4 && < 5
                      , lens 
+                     , mtl
                      , aeson
                      , wreq
                      , docopt
@@ -39,6 +40,7 @@ Executable scrapegis
   hs-source-dirs:      src
   Build-depends:       base >= 4 && < 5
                      , lens 
+                     , mtl
                      , aeson
                      , wreq
                      , docopt
@@ -59,6 +61,7 @@ Test-Suite scrapegis-test
                       , scrapegis
                       , hspec
                       , lens 
+                      , mtl
                       , aeson
                       , wreq
                       , docopt

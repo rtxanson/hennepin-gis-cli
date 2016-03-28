@@ -1,8 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
 module Scrapegis.Hennepin
     ( getHenCountyRecords
     ) where
+
+import Scrapegis.App
 
 import Scrapegis.Types
 import Scrapegis.Utils
@@ -20,6 +22,7 @@ import Data.Text as T
 import Data.List as L
 
 import qualified Data.ByteString.Lazy as B
+import Control.Monad.Reader
 
 import System.IO (stderr, hPutStrLn)
 
@@ -28,10 +31,13 @@ import System.IO (stderr, hPutStrLn)
 -- | POSTs all the object IDs and returns actual objects. Requests falling under the 
 -- | second are chunked by 900, so larger requests may take some time.
 
-getHenCountyRecords :: Text -> IO [FeatureLookup]
-getHenCountyRecords query_string = do
-    m <- decodeIDResponseToJSON <$> idReq query_string
-    bbq <- fetchInChunks m
+getHenCountyRecords :: AppIO [FeatureLookup]
+getHenCountyRecords = do
+    AppEnv { .. } <- ask
+
+    m <- liftIO $ decodeIDResponseToJSON <$> idReq (T.pack queryString)
+    bbq <- liftIO $ fetchInChunks m
+
     let lookups = parseLookups bbq
     return $ lookups
   where

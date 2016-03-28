@@ -16,6 +16,9 @@ import System.Console.Docopt
 import System.Environment (getArgs)
 
 import Data.List as L
+import Data.Maybe
+
+import Scrapegis.App
 
 patterns :: Docopt
 patterns = [docoptFile|src/Usage.txt|]
@@ -72,8 +75,11 @@ handleOpts opts = do
 
   where
       output_file = getArgWithDefault opts "stdout" (longOption "out")
-      go q = runQuery output_file q
 
       whenCmd x = when $ opts `isPresent` (command x)
       getOpt  x =        L.concat $ opts `getAllArgs` (argument x)
 
+      go q = runAppT as ae runQuery
+        where
+          as = AppState { resultData = Nothing }
+          ae = AppEnv { outputFile = output_file, queryString = q }
