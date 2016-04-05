@@ -17,7 +17,7 @@ Library
   Build-depends:       base >= 4 && < 5
                      , lens 
                      , mtl
-                     , aeson
+                     , aeson >= 0.11.0.0
                      , wreq
                      , docopt
                      , cassava
@@ -41,7 +41,7 @@ Executable scrapegis
   Build-depends:       base >= 4 && < 5
                      , lens 
                      , mtl
-                     , aeson
+                     , aeson >= 0.11.0.0
                      , wreq
                      , docopt
                      , cassava
@@ -62,7 +62,7 @@ Test-Suite scrapegis-test
                       , hspec
                       , lens 
                       , mtl
-                      , aeson
+                      , aeson >= 0.11.0.0
                       , wreq
                       , docopt
                       , cassava

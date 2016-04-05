@@ -10,9 +10,7 @@ import System.IO ( stderr
                  )
 
 import qualified Data.ByteString.Lazy.Char8 as D8
-import Data.Text as T
 import Data.List as L
-import Control.Applicative
 import Control.Monad.Reader
 import Control.Monad.State
 

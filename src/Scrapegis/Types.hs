@@ -19,7 +19,6 @@ import Data.Aeson.Types
 import qualified Data.ByteString.Lazy.Char8 as D8
 
 import Control.Applicative
-import Data.Maybe
 import Data.Csv (toRecord, toField, ToRecord, record)
 
 import GHC.Generics

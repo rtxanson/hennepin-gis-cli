@@ -7,9 +7,10 @@ Wrote this more or less to learn more Haskell, apologies to anyone who actually 
 
 ## Installation
 
-Build with `make all` or if for some crazy reason you need this installed:
+For the love of open data and all that is holy, just use stack.
 
-    make global-install
+    stack build
+
 
 ## Usage
 
