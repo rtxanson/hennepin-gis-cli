@@ -16,7 +16,6 @@ import System.Console.Docopt
 import System.Environment (getArgs)
 
 import Data.List as L
-import Data.Maybe
 
 import Scrapegis.App
 
