@@ -56,4 +56,3 @@ handleOutput = do
       printTheThing (D8.hPut h) rd
       hClose h
       hPutStrLn stderr $ "Written to: " ++ outputFile
-
