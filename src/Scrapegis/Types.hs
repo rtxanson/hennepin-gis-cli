@@ -15,7 +15,7 @@ import Data.List as L
 import Data.Text as T
 
 import Data.Aeson
-import Data.Aeson.Types
+
 import qualified Data.ByteString.Lazy.Char8 as D8
 
 import Control.Applicative
@@ -25,22 +25,23 @@ import GHC.Generics
 
 import Control.Monad (mzero)
 
-data OutputData = OutputData {
-    csvHeader  :: D8.ByteString
+data OutputData = OutputData 
+  { csvHeader  :: D8.ByteString
   , csvRecords :: [Feature]
-}
+  } deriving (Show)
 
-data RequestBatch = RequestBatch {
-    batchNumber :: Int
+data RequestBatch = RequestBatch 
+  { batchNumber :: Int
   , batchTotal :: Int
   , batchValues :: [Integer]
-}
+  } deriving (Show)
+
 -- | Each JSON result contains a list of `Feature` objects, which contains both
 -- | attributes and geographical information. FeatureAttributes handles only
 -- | the attribute section.
 
-data FeatureAttributes = FeatureAttributes {
-      getPID :: String
+data FeatureAttributes = FeatureAttributes 
+    { getPID :: String
     , getHOUSE_NO :: Integer
     , getSTREET_NM :: String
     , getZIP_CD :: String
@@ -115,15 +116,16 @@ data FeatureAttributes = FeatureAttributes {
     -- , getTifProjectNumber :: String
     -- , getWatershedNumber :: String
     } deriving (Generic, Show)
+featureOpts = defaultOptions { fieldLabelModifier = L.drop 3 }
 
 -- | Control parsing the JSON into a Haskell data type.
 
 instance ToJSON FeatureAttributes where
-  toEncoding = genericToEncoding defaultOptions { fieldLabelModifier = (L.drop 3) }
-  toJSON     = genericToJSON defaultOptions { fieldLabelModifier = (L.drop 3) }
+  toEncoding = genericToEncoding featureOpts
+  toJSON     = genericToJSON featureOpts
 
 instance FromJSON FeatureAttributes where
-  parseJSON = genericParseJSON defaultOptions { fieldLabelModifier = (L.drop 3) }
+  parseJSON = genericParseJSON featureOpts
 
 -- | This handles the JSON returned by the first object ID query. It returns no
 -- | data apart from the object IDs, which are later chunked and processed

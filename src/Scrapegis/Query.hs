@@ -35,10 +35,13 @@ runQuery = do
   AppEnv { .. } <- ask
   AppState { .. } <- get
 
-  liftIO $ do
+  liftIO $
      hPutStrLn stderr $ "  Querying with: " ++ queryString
 
   records <- Henn.getHenCountyRecords
+
+  -- TODO: not actually getting any records in outputData
+  liftIO $ print records
 
   put $ AppState {
     resultData = Just OutputData {

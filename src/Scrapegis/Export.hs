@@ -49,9 +49,10 @@ handleOutput = do
   let (Just rd) = resultData
 
   case outputFile of 
-    "stdout" -> liftIO $ do 
-      printTheThing (D8.putStrLn) rd
-    otherwise -> liftIO $ do
+    "stdout" -> liftIO $
+      printTheThing D8.putStrLn rd
+
+    _ -> liftIO $ do
       h <- openFile outputFile WriteMode
       printTheThing (D8.hPut h) rd
       hClose h

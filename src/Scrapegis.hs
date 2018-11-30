@@ -70,13 +70,13 @@ handleOpts opts = do
 
             go query_string
 
-    hPutStrLn stderr $ "Done."
+    hPutStrLn stderr "Done."
 
   where
       output_file = getArgWithDefault opts "stdout" (longOption "out")
 
-      whenCmd x = when $ opts `isPresent` (command x)
-      getOpt  x =        L.concat $ opts `getAllArgs` (argument x)
+      whenCmd x = when $ opts `isPresent` command x
+      getOpt  x =        L.concat $ opts `getAllArgs` argument x
 
       go q = runAppT as ae runQuery
         where
