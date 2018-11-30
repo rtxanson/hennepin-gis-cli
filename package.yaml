@@ -21,7 +21,7 @@ library:
 executables:
   scrapegis:
     main: Main.hs
-    source-dirs: src
+    source-dirs: app
     ghc-options:
     - -Wall
     dependencies:

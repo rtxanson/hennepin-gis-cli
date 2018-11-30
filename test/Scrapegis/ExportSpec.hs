@@ -38,7 +38,7 @@ spec = do
       h <- openFile "test_data/object_ids.json" ReadMode
       instr <- B.hGetContents h
       let (Just json) = textToQueryResult instr
-      let first = getIDList json !! 0
+      let first = head (getIDList json)
       first `shouldBe` 461446
       hClose h
 
@@ -46,19 +46,28 @@ spec = do
       h <- openFile "test_data/test_attributes.json" ReadMode
       instr <- B.hGetContents h
       let (Just json) = textToAttributes instr
-      putStrLn $ getZIP_CD json
-      (getZIP_CD json) `shouldBe` "55401"
+      case textToAttributes instr of
+         Just json -> do
+              putStrLn $ getZIP_CD json
+              getZIP_CD json `shouldBe` "55401"
+         Nothing -> do
+              putStrLn "something failed"
+              "Boop" `shouldBe` "55401"
       hClose h
 
 
     it "can parse Feature Lookup JSON" $ do
       h <- openFile "test_data/two_json.json" ReadMode
       instr <- B.hGetContents h
-      let (Just json) = textToFeatureLookup instr
-      let feats = getFeatures json
-      let attrs = featureAttributes $ feats !! 0
-      putStrLn $ getZIP_CD attrs
-      (getZIP_CD attrs) `shouldBe` "55401"
+      case textToFeatureLookup instr of
+         Just json -> do
+              let feats = getFeatures json
+              let attrs = featureAttributes $ feats !! 0
+              putStrLn $ getZIP_CD attrs
+              getZIP_CD attrs `shouldBe` "55401"
+         Nothing -> do
+              putStrLn "something failed"
+              "Boop" `shouldBe` "55401"
       hClose h
 
   describe "Scrapegis.Export" $ do

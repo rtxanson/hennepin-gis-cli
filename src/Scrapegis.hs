@@ -20,7 +20,7 @@ import Data.List as L
 import Scrapegis.App
 
 patterns :: Docopt
-patterns = [docoptFile|src/Usage.txt|]
+patterns = [docoptFile|Usage.txt|]
 
 run :: IO ()
 run =  do

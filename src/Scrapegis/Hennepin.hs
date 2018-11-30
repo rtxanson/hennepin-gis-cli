@@ -39,7 +39,7 @@ getHenCountyRecords = do
     bbq <- liftIO $ fetchInChunks m
 
     let lookups = parseLookups bbq
-    return $ lookups
+    return lookups
   where
     parseLookups :: [Response B.ByteString] -> [FeatureLookup]
     parseLookups ls = catMaybes $ decodeRecResponseToJSON <$> ls
@@ -70,7 +70,7 @@ fetchChunks x = mapM getRecordByIds batches
 
 getRecordByIds :: RequestBatch -> IO (Response B.ByteString)
 getRecordByIds batch = do
-    hPutStrLn stderr $ status_message
+    hPutStrLn stderr status_message
     post hennepin_gis_host args
   where
     args = [ "objectIds" := (ids_as_string :: T.Text)
@@ -84,17 +84,15 @@ getRecordByIds batch = do
     ids_as_string = T.intercalate comma id_strings
     id_strings = T.pack <$> [show i | i <- ids]
 
-    remaining_count = (batchTotal batch) - (batchNumber batch)
+    remaining_count = batchTotal batch - batchNumber batch
     status_message
-      | remaining_count > 0 = "Requests remaining: " ++ (show remaining_count)
+      | remaining_count > 0 = "Requests remaining: " ++ show remaining_count
       | otherwise           = "Requesting..."
 
 
 fetchInChunks :: Maybe IDQueryResult -> IO [Response B.ByteString]
-fetchInChunks ids = do
-    let chunks = chunkArray 900 (getIDs ids)
-    bbq <- fetchChunks chunks
-    return $ bbq
+fetchInChunks ids =
+    fetchChunks $ chunkArray 900 (getIDs ids)
   where
     getIDs :: Maybe IDQueryResult -> [Integer]
     getIDs (Just array) = getIDList array

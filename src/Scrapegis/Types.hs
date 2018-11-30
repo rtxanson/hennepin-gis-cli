@@ -18,12 +18,9 @@ import Data.Aeson
 
 import qualified Data.ByteString.Lazy.Char8 as D8
 
-import Control.Applicative
 import Data.Csv (toRecord, toField, ToRecord, record)
 
 import GHC.Generics
-
-import Control.Monad (mzero)
 
 data OutputData = OutputData 
   { csvHeader  :: D8.ByteString
@@ -116,6 +113,8 @@ data FeatureAttributes = FeatureAttributes
     -- , getTifProjectNumber :: String
     -- , getWatershedNumber :: String
     } deriving (Generic, Show)
+
+featureOpts :: Options
 featureOpts = defaultOptions { fieldLabelModifier = L.drop 3 }
 
 -- | Control parsing the JSON into a Haskell data type.
@@ -138,7 +137,7 @@ data IDQueryResult = IDQueryResult { getIDList :: [Integer]
 
 instance FromJSON IDQueryResult where
   parseJSON (Object o) = IDQueryResult <$> (o .: "objectIds")
-  parseJSON  _ = mzero
+  parseJSON _ = fail "IDQueryResult could not be parsed"
 
 -- | This is returned in FeatureLookups queries.
 
@@ -149,7 +148,7 @@ data Feature = Feature { featureAttributes :: FeatureAttributes
 
 instance FromJSON Feature where
   parseJSON (Object o) = Feature <$> o .: "attributes"
-  parseJSON  _ = mzero
+  parseJSON _ = fail "Feature could not be parsed"
 
 -- | This is the result of querying a set of IDs.
 
@@ -168,7 +167,7 @@ instance FromJSON FeatureLookup where
                                        -- <*> o .: "fieldAliases"
                                        -- <*> o .: "spatialReference"
                                        -- <*> o .: "geometryType"
-  parseJSON  _ = mzero
+  parseJSON _ = fail "FeatureLookup could not be parsed"
 
 
 -- | FeatureLookup CSV serialization.
