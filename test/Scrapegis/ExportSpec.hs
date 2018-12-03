@@ -21,14 +21,14 @@ import qualified Data.ByteString.Lazy as B
 
 import Data.Aeson
 
-textToQueryResult :: B.ByteString -> Maybe IDQueryResult
-textToQueryResult text = decode text :: Maybe IDQueryResult
+textToQueryResult :: B.ByteString -> Either String IDQueryResult
+textToQueryResult = eitherDecode
 
-textToFeatureLookup :: B.ByteString -> Maybe FeatureLookup
-textToFeatureLookup text = decode text :: Maybe FeatureLookup
+textToFeatureLookup :: B.ByteString -> Either String FeatureLookup
+textToFeatureLookup = eitherDecode
 
-textToAttributes :: B.ByteString -> Maybe FeatureAttributes
-textToAttributes text = decode text :: Maybe FeatureAttributes
+textToAttributes :: B.ByteString -> Either String FeatureAttributes
+textToAttributes = eitherDecode
 
 spec :: Spec
 spec = do
@@ -37,22 +37,25 @@ spec = do
     it "can parse ID Query Result JSON" $ do
       h <- openFile "test_data/object_ids.json" ReadMode
       instr <- B.hGetContents h
-      let (Just json) = textToQueryResult instr
-      let first = head (getIDList json)
-      first `shouldBe` 461446
+      case textToQueryResult instr of
+        Left err -> do
+          putStrLn err
+          "bbq" `shouldBe` "foo"
+        Right json -> do
+          let first = head (getIDList json)
+          first `shouldBe` 461446
       hClose h
 
     it "can parse Feature Lookup Attribute JSON" $ do
       h <- openFile "test_data/test_attributes.json" ReadMode
       instr <- B.hGetContents h
-      let (Just json) = textToAttributes instr
       case textToAttributes instr of
-         Just json -> do
+         Left err -> do
+              putStrLn err
+              "Boop" `shouldBe` "55401"
+         Right json -> do
               putStrLn $ getZIP_CD json
               getZIP_CD json `shouldBe` "55401"
-         Nothing -> do
-              putStrLn "something failed"
-              "Boop" `shouldBe` "55401"
       hClose h
 
 
@@ -60,25 +63,27 @@ spec = do
       h <- openFile "test_data/two_json.json" ReadMode
       instr <- B.hGetContents h
       case textToFeatureLookup instr of
-         Just json -> do
+         Left err -> do
+              putStrLn err
+              "Boop" `shouldBe` "55401"
+         Right json -> do
               let feats = getFeatures json
-              let attrs = featureAttributes $ feats !! 0
+              let attrs = featureAttributes $ head feats
               putStrLn $ getZIP_CD attrs
               getZIP_CD attrs `shouldBe` "55401"
-         Nothing -> do
-              putStrLn "something failed"
-              "Boop" `shouldBe` "55401"
       hClose h
 
-  describe "Scrapegis.Export" $ do
-
+  describe "Scrapegis.Export" $
     it "can turn Feature Lookup JSON to CSV" $ do
 
       h <- openFile "test_data/test_chunk.json" ReadMode
       instr <- B.hGetContents h
-      let (Just json) = textToFeatureLookup instr
-      let feats = take 2 $ getFeatures json
-      let csv = featuresToCSV feats
 
-      hClose h
+      case textToFeatureLookup instr of
+        Left err -> 
+          putStrLn err
+        Right json -> do
+          let feats = take 2 $ getFeatures json
+          let csv = featuresToCSV feats
+          hClose h
 

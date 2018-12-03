@@ -38,62 +38,62 @@ data RequestBatch = RequestBatch
 -- | the attribute section.
 
 data FeatureAttributes = FeatureAttributes 
-    { getPID :: String
-    , getHOUSE_NO :: Integer
-    , getSTREET_NM :: String
-    , getZIP_CD :: String
-    , getOWNER_NM :: String
-    , getTAXPAYER_NM :: String
-    , getTAXPAYER_NM_1 :: String
-    , getTAXPAYER_NM_2 :: String
-    , getTAXPAYER_NM_3 :: String
-    , getABBREV_ADDN_NM :: String
-    , getBLOCK :: String
-    , getLOT :: String
-    , getHMSTD_CD1 :: String
-    , getHMSTD_CD1_NAME :: String
+    { getPID                    :: String
+    , getHOUSE_NO               :: Integer
+    , getSTREET_NM              :: String
+    , getZIP_CD                 :: String
+    , getOWNER_NM               :: String
+    , getTAXPAYER_NM            :: String
+    , getTAXPAYER_NM_1          :: String
+    , getTAXPAYER_NM_2          :: String
+    , getTAXPAYER_NM_3          :: String
+    , getABBREV_ADDN_NM         :: String
+    , getBLOCK                  :: String
+    , getLOT                    :: String
+    , getHMSTD_CD1              :: String
+    , getHMSTD_CD1_NAME         :: String
 
-    , getADDITION_NO :: String
-    , getMKT_VAL_TOT :: Integer
-    , getTAX_TOT :: Integer
-    , getFORFEIT_LAND_IND :: String
-    , getBUILD_YR :: String
-    , getMUNIC_CD :: String
-    , getMUNIC_NM :: String
+    , getADDITION_NO            :: String
+    , getMKT_VAL_TOT            :: Integer
+    , getTAX_TOT                :: Double
+    , getFORFEIT_LAND_IND       :: String
+    , getBUILD_YR               :: String
+    , getMUNIC_CD               :: String
+    , getMUNIC_NM               :: String
 
-    , getABSTR_TORRENS_CD    :: String
-    , getTORRENS_TYP         :: String
-    , getCONDO_NO            :: String
-    , getCONTIG_IND1         :: String
-    , getCO_OP_IND           :: String
-    , getNET_TAX_CAPACITY    :: Integer
-    , getEST_BLDG_MKT_VAL1   :: Integer
-    , getEST_BLDG_MKT_VAL2   :: Integer
-    , getEST_BLDG_MKT_VAL3   :: Integer
-    , getEST_BLDG_MKT_VAL4   :: Integer
-    , getEST_LAND_MKT_VAL1   :: Integer
-    , getEST_LAND_MKT_VAL2   :: Integer
-    , getEST_LAND_MKT_VAL3   :: Integer
-    , getEST_LAND_MKT_VAL4   :: Integer
-    , getFEATURECODE         :: Integer
-    , getFRAC_HOUSE_NO       :: String
-    , getMAILING_MUNIC_CD    :: String
-    , getMAILING_MUNIC_NM    :: String
-    , getMETES_BNDS1         :: String
-    , getMETES_BNDS2         :: String
-    , getMETES_BNDS3         :: String
-    , getMETES_BNDS4         :: String
-    , getMORE_METES_BNDS_IND :: String
-    , getMULTI_ADDR_IND      :: String
-    , getOBJECTID            :: Integer
+    , getABSTR_TORRENS_CD       :: String
+    , getTORRENS_TYP            :: String
+    , getCONDO_NO               :: String
+    , getCONTIG_IND1            :: String
+    , getCO_OP_IND              :: String
+    , getNET_TAX_CAPACITY       :: Integer
+    , getEST_BLDG_MKT_VAL1      :: Integer
+    , getEST_BLDG_MKT_VAL2      :: Integer
+    , getEST_BLDG_MKT_VAL3      :: Integer
+    , getEST_BLDG_MKT_VAL4      :: Integer
+    , getEST_LAND_MKT_VAL1      :: Integer
+    , getEST_LAND_MKT_VAL2      :: Integer
+    , getEST_LAND_MKT_VAL3      :: Integer
+    , getEST_LAND_MKT_VAL4      :: Integer
+    , getFEATURECODE            :: Integer
+    , getFRAC_HOUSE_NO          :: String
+    , getMAILING_MUNIC_CD       :: String
+    , getMAILING_MUNIC_NM       :: String
+    , getMETES_BNDS1            :: String
+    , getMETES_BNDS2            :: String
+    , getMETES_BNDS3            :: String
+    , getMETES_BNDS4            :: String
+    , getMORE_METES_BNDS_IND    :: String
+    , getMULTI_ADDR_IND         :: String
+    , getOBJECTID               :: Integer
 
-    , getPID_TEXT  :: String
-    , getPROPERTY_STATUS_CD  :: String
-    , getPROPERTY_TYPE_CD1  :: String
-    , getPROPERTY_TYPE_CD1_NAME  :: String
-    , getPROPERTY_TYPE_CD2  :: String
-    , getPROPERTY_TYPE_CD3  :: String
-    , getPROPERTY_TYPE_CD4  :: String
+    , getPID_TEXT               :: String
+    , getPROPERTY_STATUS_CD     :: String
+    , getPROPERTY_TYPE_CD1      :: String
+    , getPROPERTY_TYPE_CD1_NAME :: String
+    , getPROPERTY_TYPE_CD2      :: String
+    , getPROPERTY_TYPE_CD3      :: String
+    , getPROPERTY_TYPE_CD4      :: String
 
     -- TODO: rename from csv header values
     -- , getPidText :: String
@@ -307,6 +307,7 @@ instance ToRecord Feature where
                         , getMORE_METES_BNDS_IND
                         , getMULTI_ADDR_IND
                         , (show . getOBJECTID)
+
                         , getPID_TEXT
                         , getPROPERTY_STATUS_CD
                         , getPROPERTY_TYPE_CD1

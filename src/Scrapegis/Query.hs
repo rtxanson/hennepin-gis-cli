@@ -40,9 +40,6 @@ runQuery = do
 
   records <- Henn.getHenCountyRecords
 
-  -- TODO: not actually getting any records in outputData
-  liftIO $ print records
-
   put $ AppState {
     resultData = Just OutputData {
          csvHeader = feature_header_bs
