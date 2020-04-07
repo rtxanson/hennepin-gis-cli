@@ -320,7 +320,7 @@ instance ToRecord Feature where
                         , getPROPERTY_TYPE_CD3
                         , getPROPERTY_TYPE_CD4
 
-                        , cleanDate <$> getSALE_DATE
+                        , getSALE_DATE
                         , (show . getSALE_PRICE)
                         ]
 
