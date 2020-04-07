@@ -17,6 +17,7 @@ import Control.Lens
 
 import Data.Aeson
 import Data.Maybe (catMaybes)
+import Data.Either (lefts, rights)
 
 import Data.Text as T
 import Data.List as L
@@ -25,6 +26,7 @@ import qualified Data.ByteString.Lazy as B
 import Control.Monad.Reader
 
 import System.IO (stderr, hPutStrLn)
+import Debug.Trace (traceShow, traceIO)
 
 -- | This is the main access point to the Hennepin County GIS Property records.
 -- | It initiates two requests: one to fetch object IDs, and the second which
@@ -36,13 +38,26 @@ getHenCountyRecords = do
     AppEnv { .. } <- ask
 
     m <- liftIO $ decodeIDResponseToJSON <$> idReq (T.pack queryString)
-    bbq <- liftIO $ fetchInChunks m
 
-    let lookups = parseLookups bbq
-    return lookups
+    case m of 
+       Left a ->  do
+            liftIO $ putStrLn a
+            return []
+       Right r ->  do
+            res <- liftIO $ fetchInChunks (Just r)
+            let lookups = parseLookups res
+            let errs = parseErrs  res
+            liftIO $ putStrLn $ show errs
+            return lookups
+
   where
-    parseLookups :: [Response B.ByteString] -> [FeatureLookup]
-    parseLookups ls = catMaybes $ decodeRecResponseToJSON <$> ls
+    decd ls = decodeRecResponseToJSON <$> ls
+
+    -- parseLookups :: [Response B.ByteString] -> [FeatureLookup]
+    parseLookups ls = rights $ decd ls
+    -- decodeRecResponseToJSON <$> ls
+
+    parseErrs ls = lefts $ decd ls
 
 -- | For a given querystring, this returns a Response containing matching
 -- | object IDs.
@@ -98,8 +113,8 @@ fetchInChunks ids =
     getIDs (Just array) = getIDList array
     getIDs Nothing = []
 
-decodeIDResponseToJSON :: Response B.ByteString -> Maybe IDQueryResult
-decodeIDResponseToJSON r = (decode <$> r) ^. responseBody
+decodeIDResponseToJSON :: Response B.ByteString -> Either String IDQueryResult
+decodeIDResponseToJSON r = (eitherDecode <$> r) ^. responseBody
 
-decodeRecResponseToJSON :: Response B.ByteString -> Maybe FeatureLookup
-decodeRecResponseToJSON r = (decode <$> r) ^. responseBody
+decodeRecResponseToJSON :: Response B.ByteString -> Either String FeatureLookup
+decodeRecResponseToJSON r = (eitherDecode <$> r) ^. responseBody

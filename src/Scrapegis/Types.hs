@@ -105,8 +105,8 @@ data FeatureAttributes = FeatureAttributes
     -- , getPropertyTypeCd4 :: String
     -- , getSaleCode :: String
     -- , getSaleCodeName :: String
-    -- , getSaleDate :: String
-    -- , getSalePrice :: Integer
+    , getSALE_DATE :: String
+    , getSALE_PRICE :: Integer
     -- , getSchoolDistNo :: String
     -- , getSewerDistNo :: String
     -- , getStateCd :: Integer
@@ -242,8 +242,8 @@ feature_header_cols = [ "PID"
                       , "PROPERTY_TYPE_CD4"
                       -- , "SALE_CODE"
                       -- , "SALE_CODE_NAME"
-                      -- , "SALE_DATE"
-                      -- , "SALE_PRICE"
+                      , "SALE_DATE"
+                      , "SALE_PRICE"
                       -- , "SCHOOL_DIST_NO"
                       -- , "SEWER_DIST_NO"
                       -- , "STATE_CD"
@@ -259,6 +259,10 @@ instance ToRecord Feature where
   toRecord feat = record row_fields
     where
       clean = T.unpack . T.strip . T.pack
+      cleanDate x = m ++ "/" ++ y
+        where m = L.drop 4 x
+              y = L.take 4 x
+
       field_accessors = [ getPID
                         , (show . getHOUSE_NO )
                         , getSTREET_NM
@@ -315,6 +319,9 @@ instance ToRecord Feature where
                         , getPROPERTY_TYPE_CD2
                         , getPROPERTY_TYPE_CD3
                         , getPROPERTY_TYPE_CD4
+
+                        , cleanDate <$> getSALE_DATE
+                        , (show . getSALE_PRICE)
                         ]
 
       row_fields = toField <$> [clean (f attrs) | f <- field_accessors]
