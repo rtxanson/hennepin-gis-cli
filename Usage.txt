@@ -8,7 +8,7 @@ server.
     ...
 
 Usage: 
-  scrapegis fetch city [options]
+  scrapegis fetch city <query_arg> [options]
   scrapegis fetch zip <query_arg> [options]
   scrapegis fetch taxpayer <query_arg> [options]
   scrapegis fetch owner <query_arg> [options]

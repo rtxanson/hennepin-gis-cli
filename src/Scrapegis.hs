@@ -56,9 +56,6 @@ handleOpts opts = do
             go query_string
 
         whenCmd "city" $ do
-            -- EDINA: 24
-            -- ORONO: 38
-            -- RICHFIELD: 42
             let query_arg = getOpt "query_arg"
             let query_string = makeQueryString "city" query_arg
 
