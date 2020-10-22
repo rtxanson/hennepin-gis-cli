@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings, RecordWildCards #-}
 
-module Scrapegis.Hennepin
+module Scrapegis.Multnomah
     ( getHenCountyRecords
     ) where
 
@@ -28,7 +28,7 @@ import Control.Monad.Reader
 import System.IO (stderr, hPutStrLn)
 import Debug.Trace (traceShow, traceIO)
 
--- | This is the main access point to the Hennepin County GIS Property records.
+-- | This is the main access point to the Multnomah County GIS Property records.
 -- | It initiates two requests: one to fetch object IDs, and the second which
 -- | POSTs all the object IDs and returns actual objects. Requests falling under the 
 -- | second are chunked by 900, so larger requests may take some time.

@@ -13,20 +13,24 @@ import Data.List as L
 import Control.Monad.Reader
 import Control.Monad.State
 
-import Scrapegis.Hennepin as Henn
+import Scrapegis.Multnomah as Mult
 -- import Scrapegis.MockHennepin as Mock
 import Scrapegis.App
 import Scrapegis.Types
 import Scrapegis.Export
 
+-- Field doc:
+-- http://www3.multco.us/arcgispublic/rest/services/DART/Taxlots_Orion_Public/MapServer/layers
+--
 makeQueryString :: String -> String -> String
-makeQueryString "zip"      aarg = "ZIP_CD = '" ++ aarg ++ "'"
-makeQueryString "owner"    aarg = "OWNER_NM LIKE '" ++ aarg ++ "'"
+makeQueryString "zip"      aarg = "ZIP = '" ++ aarg ++ "'"
+makeQueryString "owner"    aarg = "NAME LIKE '" ++ aarg ++ "'"
 makeQueryString "taxpayer" aarg = "TAXPAYER_NM LIKE '" ++ aarg ++ "'"
-makeQueryString "names"    aarg = "TAXPAYER_NM LIKE '" ++ aarg ++ "' OR " ++
-                                  "OWNER_NM LIKE '" ++ aarg ++ "'"
-makeQueryString "city"     _ = "MUNIC_CD = '01'" -- (minneapolis)
-makeQueryString "pid"      aarg = "PID = '" ++ aarg ++ "'"
+makeQueryString "names"    aarg = "NAME LIKE '" ++ aarg ++ "' OR " ++
+                                  "NAME2 LIKE '" ++ aarg ++ "'"
+makeQueryString "city"     aarg = "CITY = '" ++ aarg ++ "'"
+makeQueryString "pid"      aarg = "PROPID = '" ++ aarg ++ "'"
+makeQueryString "propid"   aarg = "PROPID = '" ++ aarg ++ "'"
 makeQueryString _ _ = ""
 
 -- configured process
@@ -38,7 +42,7 @@ runQuery = do
   liftIO $
      hPutStrLn stderr $ "  Querying with: " ++ queryString
 
-  records <- Henn.getHenCountyRecords
+  records <- Mult.getHenCountyRecords
 
   put $ AppState {
     resultData = Just OutputData {

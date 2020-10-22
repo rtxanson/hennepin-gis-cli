@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Scrapegis.Settings
-    ( hennepin_gis_host
+    ( multnomah_gis_host
     ) where
 
-hennepin_gis_host :: String
-hennepin_gis_host = "https://gis.hennepin.us/ArcGIS/rest/services/Maps/PROPERTY/MapServer/0/query"
+-- http://www3.multco.us/arcgispublic/rest/services/DART/Taxlots_Orion_Public/MapServer?f=pjson
+multnomah_gis_host :: String
+multnomah_gis_host = "http://www3.multco.us/arcgispublic/rest/services/DART/Taxlots_Orion_Public/MapServer/0/query"
