@@ -87,10 +87,10 @@ data FeatureAttributes = FeatureAttributes
     , getMAINAREA       :: Integer
     , getUNITS          :: Integer
     , getMAIN_SQFT      :: Integer
-    , getROLLYEAR       :: Integer -- SmallInteger
-    , getROLLLAND       :: Double
-    , getROLLIMP        :: Double
-    , getROLLM50        :: Double
+    , getROLLYEAR       :: Maybe Integer -- SmallInteger
+    , getROLLLAND       :: Maybe Double
+    , getROLLIMP        :: Maybe Double
+    , getROLLM50        :: Maybe Double
     , getSHAPE_Length   :: Double
     , getSHAPE_Area     :: Double
     , getxCentroid      :: Double
@@ -291,10 +291,10 @@ instance ToRecord Feature where
                         , (show . getMAINAREA)
                         , (show . getUNITS)
                         , (show . getMAIN_SQFT)
-                        , (show . getROLLYEAR) -- SmallInteger
-                        , (show . getROLLLAND)
-                        , (show . getROLLIMP)
-                        , (show . getROLLM50)
+                        , (mbeShow . getROLLYEAR) -- SmallInteger
+                        , (mbeShow . getROLLLAND)
+                        , (mbeShow . getROLLIMP)
+                        , (mbeShow . getROLLM50)
                         , (show . getSHAPE_Length)
                         , (show . getSHAPE_Area)
                         , (show . getxCentroid)
