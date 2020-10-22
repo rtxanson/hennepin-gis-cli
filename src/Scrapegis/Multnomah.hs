@@ -63,7 +63,7 @@ getHenCountyRecords = do
 -- | object IDs.
 
 idReq :: Text -> IO (Response B.ByteString)
-idReq querystring = getWith opts hennepin_gis_host
+idReq querystring = getWith opts multnomah_gis_host
   where
     opts = defaults & param "where" .~ [querystring]
                     & param "f" .~ ["json"]
@@ -86,7 +86,7 @@ fetchChunks x = mapM getRecordByIds batches
 getRecordByIds :: RequestBatch -> IO (Response B.ByteString)
 getRecordByIds batch = do
     hPutStrLn stderr status_message
-    post hennepin_gis_host args
+    post multnomah_gis_host args
   where
     args = [ "objectIds" := (ids_as_string :: T.Text)
            , "f" := ("json" :: T.Text)
