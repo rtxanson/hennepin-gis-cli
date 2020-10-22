@@ -50,17 +50,17 @@ data FeatureAttributes = FeatureAttributes
     , getCITY           :: String
     , getSTATE          :: String
     , getZIP            :: String
-    , getSITUSNUM       :: String
-    , getSITUSDIR       :: String
-    , getSITUSNAME      :: String
-    , getSITUSSUFFIX    :: String
-    , getSITUSSUFFIX2   :: String
-    , getSITUSUNITTYPE  :: String
-    , getSITUSUNITNUM   :: String
-    , getSITUSADDR      :: String
-    , getSITUSCITY      :: String
-    , getSITUSSTATE     :: String
-    , getSITUSZIP       :: String
+    , getSITUSNUM       :: Maybe String
+    , getSITUSDIR       :: Maybe String
+    , getSITUSNAME      :: Maybe String
+    , getSITUSSUFFIX    :: Maybe String
+    , getSITUSSUFFIX2   :: Maybe String
+    , getSITUSUNITTYPE  :: Maybe String
+    , getSITUSUNITNUM   :: Maybe String
+    , getSITUSADDR      :: Maybe String
+    , getSITUSCITY      :: Maybe String
+    , getSITUSSTATE     :: Maybe String
+    , getSITUSZIP       :: Maybe String
     , getMAPID          :: String
     , getLEGAL          :: String
     , getTRACTLOT       :: String
@@ -75,14 +75,14 @@ data FeatureAttributes = FeatureAttributes
     , getPROP_CODE      :: String
     , getDEED_TYPE      :: String
     , getINST_NUM       :: String
-    , getDEED_DATE      :: String -- esriFieldTypeDate
+    , getDEED_DATE      :: Maybe Integer -- esriFieldTypeDate
     , getSALE_PRICE     :: Double
-    , getSALE_DATE      :: String -- esriFieldTypeDate
+    , getSALE_DATE      :: Maybe Integer -- esriFieldTypeDate
     , getEXEMPTION      :: String
-    , getZONING         :: String
+    , getZONING         :: Maybe String
     , getSIZEACRES      :: Double
-    , getSIZESQFT       :: Integer
-    , getIMPTYPE        :: String
+    , getSIZESQFT       :: Maybe Integer
+    -- , getIMPTYPE        :: String
     , getACTYEARBUILT   :: Integer
     , getMAINAREA       :: Integer
     , getUNITS          :: Integer
@@ -214,7 +214,7 @@ feature_header_cols = [ "OBJECTID_1"
                       , "ZONING"
                       , "SIZEACRES"
                       , "SIZESQFT"
-                      , "IMPTYPE"
+                      -- , "IMPTYPE"
                       , "ACTYEARBUILT"
                       , "MAINAREA"
                       , "UNITS"
@@ -254,17 +254,17 @@ instance ToRecord Feature where
                         , getCITY 
                         , getSTATE 
                         , getZIP 
-                        , getSITUSNUM 
-                        , getSITUSDIR 
-                        , getSITUSNAME 
-                        , getSITUSSUFFIX 
-                        , getSITUSSUFFIX2 
-                        , getSITUSUNITTYPE 
-                        , getSITUSUNITNUM 
-                        , getSITUSADDR 
-                        , getSITUSCITY 
-                        , getSITUSSTATE 
-                        , getSITUSZIP 
+                        , (mbeShow . getSITUSNUM) 
+                        , (mbeShow . getSITUSDIR)
+                        , (mbeShow . getSITUSNAME) 
+                        , (mbeShow . getSITUSSUFFIX) 
+                        , (mbeShow . getSITUSSUFFIX2)
+                        , (mbeShow . getSITUSUNITTYPE) 
+                        , (mbeShow . getSITUSUNITNUM) 
+                        , (mbeShow . getSITUSADDR) 
+                        , (mbeShow . getSITUSCITY) 
+                        , (mbeShow . getSITUSSTATE) 
+                        , (mbeShow . getSITUSZIP) 
                         , getMAPID 
                         , getLEGAL 
                         , getTRACTLOT 
@@ -279,14 +279,14 @@ instance ToRecord Feature where
                         , getPROP_CODE 
                         , getDEED_TYPE 
                         , getINST_NUM 
-                        , getDEED_DATE -- esriFieldTypeDate
+                        , (mbeShow . getDEED_DATE) -- esriFieldTypeDate
                         , (show . getSALE_PRICE)
-                        , getSALE_DATE -- esriFieldTypeDate
+                        , (mbeShow . getSALE_DATE) -- esriFieldTypeDate
                         , getEXEMPTION 
-                        , getZONING 
+                        , (mbeShow . getZONING)
                         , (show . getSIZEACRES)
-                        , (show . getSIZESQFT)
-                        , getIMPTYPE 
+                        , (mbeShow . getSIZESQFT)
+                        -- , getIMPTYPE 
                         , (show . getACTYEARBUILT)
                         , (show . getMAINAREA)
                         , (show . getUNITS)
@@ -306,4 +306,7 @@ instance ToRecord Feature where
 
       row_fields = toField <$> [clean (f attrs) | f <- field_accessors]
       attrs = featureAttributes feat
+
+      mbeShow (Just x) = show x
+      mbeShow Nothing = ""
 
